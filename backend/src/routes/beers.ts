@@ -4,11 +4,53 @@ import { CreateBeerDTO, UpdateBeerDTO } from '../types/beer';
 
 const router = Router();
 
-// Get all beers
+// Get all beers with search, filtering, and pagination
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT * FROM beers ORDER BY last_mod DESC');
-    res.json(result.rows);
+    const {
+      search = '',
+      minAbv = 0,
+      maxAbv = 100,
+      style_id,
+      page = 1,
+      limit = 12
+    } = req.query;
+
+    const offset = (Number(page) - 1) * Number(limit);
+    
+    let query = `
+      SELECT * FROM beers 
+      WHERE name ILIKE $1 
+      AND abv >= $2 
+      AND abv <= $3
+    `;
+    const queryParams = [`%${search}%`, minAbv, maxAbv];
+
+    if (style_id) {
+      query += ' AND style_id = $4';
+      queryParams.push(style_id as string);
+    }
+
+    // Get total count for pagination
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*)');
+    const countResult = await pool.query(countQuery, queryParams);
+    const total = parseInt(countResult.rows[0].count);
+
+    // Add pagination
+    query += ' ORDER BY name ASC LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2);
+    queryParams.push(limit as string, offset.toString());
+
+    const result = await pool.query(query, queryParams);
+    
+    res.json({
+      beers: result.rows,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit))
+      }
+    });
   } catch (error) {
     console.error('Error fetching beers:', error);
     res.status(500).json({ error: 'Internal server error' });
