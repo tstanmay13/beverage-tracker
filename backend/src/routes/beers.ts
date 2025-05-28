@@ -7,7 +7,7 @@ const router = Router();
 // Get all beers
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT * FROM beers ORDER BY created_at DESC');
+    const result = await pool.query('SELECT * FROM beers ORDER BY last_mod DESC');
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching beers:', error);
@@ -36,11 +36,25 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     const beer: CreateBeerDTO = req.body;
-    const { name, brewery, style, abv, rating, image_url, notes } = beer;
+    const {
+      brewery_id,
+      name,
+      cat_id,
+      style_id,
+      abv,
+      ibu,
+      srm,
+      upc,
+      filepath,
+      descript,
+      add_user
+    } = beer;
     
     const result = await pool.query(
-      'INSERT INTO beers (name, brewery, style, abv, rating, image_url, notes) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [name, brewery, style, abv, rating, image_url, notes]
+      `INSERT INTO beers (
+        brewery_id, name, cat_id, style_id, abv, ibu, srm, upc, filepath, descript, add_user
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+      [brewery_id, name, cat_id, style_id, abv, ibu, srm, upc, filepath, descript, add_user]
     );
     
     res.status(201).json(result.rows[0]);
@@ -63,7 +77,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const values = Object.values(updates);
     
     const result = await pool.query(
-      `UPDATE beers SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
+      `UPDATE beers SET ${setClause}, last_mod = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
       [id, ...values]
     );
     
