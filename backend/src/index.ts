@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
 import beerRoutes from './routes/beers';
+import userCollectionRoutes from './routes/userCollections';
 
 // Load environment variables
 dotenv.config();
@@ -34,6 +35,7 @@ pool.connect((err, client, release) => {
 
 // Routes
 app.use('/api/beers', beerRoutes);
+app.use('/api/user-collections', userCollectionRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

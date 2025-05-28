@@ -6,7 +6,7 @@ A full-stack application for tracking and managing your beer collection. Built w
 
 - View your beer collection
 - Add new beers with details
-- Rate and review beers
+- Remove beers from your list
 - Responsive design for mobile and desktop
 - Modern UI with Material-UI components
 - RESTful API backend with PostgreSQL database
@@ -31,7 +31,6 @@ A full-stack application for tracking and managing your beer collection. Built w
 ### Prerequisites
 - Node.js (v20 or later)
 - Docker and Docker Compose
-- PostgreSQL (if running locally)
 
 ### Installation
 
@@ -46,9 +45,9 @@ cd beverage-tracker
 npm install
 ```
 
-3. Start the development environment:
+3. Start the development environment (with Docker):
 ```bash
-npm run dev
+docker-compose up -d
 ```
 
 This will start:
@@ -62,7 +61,7 @@ Create a `.env` file in the backend directory with the following variables:
 ```env
 PORT=4000
 DB_USER=postgres
-DB_HOST=localhost
+DB_HOST=db
 DB_NAME=beer_tracker
 DB_PASSWORD=postgres
 DB_PORT=5432
@@ -90,24 +89,54 @@ The backend provides the following RESTful endpoints:
 - `PUT /api/beers/:id` - Update a beer
 - `DELETE /api/beers/:id` - Delete a beer
 
+#### Beer Object Structure
+```json
+{
+  "id": number,
+  "brewery_id": number,
+  "name": string,
+  "cat_id": number,
+  "style_id": number,
+  "abv": number,
+  "ibu": number,
+  "srm": number,
+  "upc": number,
+  "filepath": string,
+  "descript": string,
+  "add_user": number,
+  "last_mod": string (timestamp)
+}
+```
+
 ### Database Schema
 
 The application uses a PostgreSQL database with the following schema:
 
 ```sql
-CREATE TABLE beers (
+CREATE TABLE IF NOT EXISTS beers (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    brewery VARCHAR(255) NOT NULL,
-    style VARCHAR(100) NOT NULL,
-    abv DECIMAL(4,2) NOT NULL,
-    rating DECIMAL(3,1),
-    image_url TEXT,
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    brewery_id INTEGER NOT NULL DEFAULT 0,
+    name VARCHAR(255) NOT NULL DEFAULT '',
+    cat_id INTEGER NOT NULL DEFAULT 0,
+    style_id INTEGER NOT NULL DEFAULT 0,
+    abv FLOAT NOT NULL DEFAULT 0,
+    ibu FLOAT NOT NULL DEFAULT 0,
+    srm FLOAT NOT NULL DEFAULT 0,
+    upc INTEGER NOT NULL DEFAULT 0,
+    filepath VARCHAR(255) NOT NULL DEFAULT '',
+    descript TEXT NOT NULL,
+    add_user INTEGER NOT NULL DEFAULT 0,
+    last_mod TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+#### Resetting the Database
+If you change the schema, you may need to drop and recreate the table:
+```bash
+docker exec -i beverage_tracker-db-1 psql -U postgres -d beer_tracker < backend/src/db/schema.sql
+```
+
+You can also insert sample data using SQL commands or a compatible SQL file.
 
 ## Building for Production
 
