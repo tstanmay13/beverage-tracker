@@ -7,34 +7,14 @@ import {
   Button,
   Box,
   Rating,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
-const beerStyles = [
-  'IPA',
-  'Stout',
-  'Porter',
-  'Pilsner',
-  'Wheat Beer',
-  'Sour',
-  'Lager',
-  'Ale',
-  'Other',
-];
 
 const AddBeer = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    brewery: '',
-    style: '',
-    abv: '',
+    beer_id: '',
     rating: 0,
-    imageUrl: '',
     notes: '',
   });
 
@@ -48,61 +28,43 @@ const AddBeer = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Replace with actual API call
-    console.log('Form submitted:', formData);
-    navigate('/');
+    try {
+      const response = await fetch('http://localhost:4000/api/user-collections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: 1, // Hardcoded for demo; replace with actual user ID
+          beer_id: parseInt(formData.beer_id),
+          rating: formData.rating,
+          notes: formData.notes,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add beer to collection');
+      }
+      navigate('/');
+    } catch (error) {
+      console.error('Error adding beer to collection:', error);
+    }
   };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Add New Beer
+          Add Beer to Collection
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <TextField
             margin="normal"
             required
             fullWidth
-            label="Beer Name"
-            name="name"
-            value={formData.name}
+            label="Beer ID"
+            name="beer_id"
+            value={formData.beer_id}
             onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Brewery"
-            name="brewery"
-            value={formData.brewery}
-            onChange={handleChange}
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Style</InputLabel>
-            <Select
-              name="style"
-              value={formData.style}
-              label="Style"
-              onChange={handleChange}
-            >
-              {beerStyles.map((style) => (
-                <MenuItem key={style} value={style}>
-                  {style}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="ABV (%)"
-            name="abv"
-            type="number"
-            value={formData.abv}
-            onChange={handleChange}
-            inputProps={{ step: 0.1 }}
           />
           <Box sx={{ mt: 2, mb: 2 }}>
             <Typography component="legend">Rating</Typography>
@@ -115,14 +77,6 @@ const AddBeer = () => {
               }}
             />
           </Box>
-          <TextField
-            margin="normal"
-            fullWidth
-            label="Image URL"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-          />
           <TextField
             margin="normal"
             fullWidth
@@ -139,7 +93,7 @@ const AddBeer = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Add Beer
+            Add to Collection
           </Button>
         </Box>
       </Paper>

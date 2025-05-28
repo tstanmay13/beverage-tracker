@@ -1,6 +1,6 @@
 # Beer Tracker
 
-A full-stack application for tracking and managing your beer collection. Built with React, Node.js, and PostgreSQL.
+A full-stack application for tracking and managing your beer collection. Built with React (Vite), Node.js, and PostgreSQL.
 
 ## Features
 
@@ -15,9 +15,10 @@ A full-stack application for tracking and managing your beer collection. Built w
 
 ### Frontend
 - React with TypeScript
+- Vite (development server, port 5173)
 - Material-UI for components
 - React Router for navigation
-- Axios for API calls
+- Fetch API for backend calls
 
 ### Backend
 - Node.js with Express
@@ -51,7 +52,7 @@ docker-compose up -d
 ```
 
 This will start:
-- Frontend on http://localhost:3000
+- Frontend on http://localhost:5173 (Vite)
 - Backend on http://localhost:4000
 - PostgreSQL on port 5432
 
@@ -69,15 +70,9 @@ DB_PORT=5432
 
 ## Development
 
-### Frontend Development
-```bash
-npm run dev:frontend
-```
+The recommended way to develop is with Docker Compose, which will run both the backend and frontend in containers. The frontend uses Vite, which is configured to run on port 5173 and is accessible from your host machine.
 
-### Backend Development
-```bash
-npm run dev:backend
-```
+If you need to run the frontend or backend outside Docker, make sure to match the ports and environment variables as above.
 
 ### API Endpoints
 
@@ -88,6 +83,9 @@ The backend provides the following RESTful endpoints:
 - `POST /api/beers` - Create a new beer
 - `PUT /api/beers/:id` - Update a beer
 - `DELETE /api/beers/:id` - Delete a beer
+- `GET /api/user-collections` - Get user beer collections
+- `POST /api/user-collections` - Add a beer to a user's collection
+- `PUT /api/user-collections` - Update a user's beer collection
 
 #### Beer Object Structure
 ```json
@@ -108,7 +106,7 @@ The backend provides the following RESTful endpoints:
 }
 ```
 
-### Database Schema
+## Database Schema
 
 The application uses a PostgreSQL database with the following schema:
 
@@ -137,6 +135,17 @@ docker exec -i beverage_tracker-db-1 psql -U postgres -d beer_tracker < backend/
 ```
 
 You can also insert sample data using SQL commands or a compatible SQL file.
+
+## Troubleshooting
+
+- **Frontend not loading or blank page:**
+  - Make sure you are visiting http://localhost:5173 (not 3000).
+  - If you see a Vite welcome page or nothing loads, try restarting Docker Compose: `docker-compose down && docker-compose up -d`.
+  - Ensure no other process is using port 5173.
+  - If you change frontend dependencies, rebuild the container.
+- **Backend or database connection errors:**
+  - Only run the backend via Docker Compose, not directly with `npm run dev`, to ensure it can connect to the database container.
+  - If you see `getaddrinfo ENOTFOUND db`, it means the backend can't find the database container. Use Docker Compose for all services.
 
 ## Building for Production
 

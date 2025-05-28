@@ -13,38 +13,43 @@ import { Link as RouterLink } from 'react-router-dom';
 
 interface Beer {
   id: number;
+  brewery_id: number;
   name: string;
-  brewery: string;
-  style: string;
+  cat_id: number;
+  style_id: number;
   abv: number;
-  rating: number;
-  imageUrl: string;
+  ibu: number;
+  srm: number;
+  upc: number;
+  filepath: string;
+  descript: string;
+  add_user: number;
+  last_mod: string;
 }
 
 const BeerList = () => {
   const [beers, setBeers] = useState<Beer[]>([]);
 
   useEffect(() => {
-    // TODO: Replace with actual API call
-    const mockBeers: Beer[] = [
-      {
-        id: 1,
-        name: 'Sample IPA',
-        brewery: 'Test Brewery',
-        style: 'IPA',
-        abv: 6.5,
-        rating: 4.5,
-        imageUrl: 'https://via.placeholder.com/150',
-      },
-      // Add more mock beers as needed
-    ];
-    setBeers(mockBeers);
+    const fetchBeers = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/api/beers');
+        if (!response.ok) {
+          throw new Error('Failed to fetch beers');
+        }
+        const data = await response.json();
+        setBeers(data);
+      } catch (error) {
+        console.error('Error fetching beers:', error);
+      }
+    };
+    fetchBeers();
   }, []);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        My Beer Collection
+        Beer Catalog
       </Typography>
       <Grid container spacing={3}>
         {beers.map((beer) => (
@@ -66,7 +71,7 @@ const BeerList = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={beer.imageUrl}
+                image={beer.filepath || 'https://via.placeholder.com/150'}
                 alt={beer.name}
               />
               <CardContent>
@@ -74,14 +79,11 @@ const BeerList = () => {
                   {beer.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {beer.brewery}
+                  ABV: {beer.abv}%
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {beer.style} • {beer.abv}% ABV
+                  {beer.descript}
                 </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Rating value={beer.rating} precision={0.5} readOnly />
-                </Box>
               </CardContent>
             </Card>
           </Grid>
