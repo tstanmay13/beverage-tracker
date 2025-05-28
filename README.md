@@ -143,6 +143,12 @@ You can also insert sample data using SQL commands or a compatible SQL file.
   - If you see a Vite welcome page or nothing loads, try restarting Docker Compose: `docker-compose down && docker-compose up -d`.
   - Ensure no other process is using port 5173.
   - If you change frontend dependencies, rebuild the container.
+  - Look at logs with 
+  ```
+  docker-compose logs frontend
+  docker-compose logs backend
+  docker-compose logs db 
+  ```
 - **Backend or database connection errors:**
   - Only run the backend via Docker Compose, not directly with `npm run dev`, to ensure it can connect to the database container.
   - If you see `getaddrinfo ENOTFOUND db`, it means the backend can't find the database container. Use Docker Compose for all services.
