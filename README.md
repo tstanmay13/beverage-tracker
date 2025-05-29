@@ -2,63 +2,57 @@
 
 A full-stack application for tracking and managing your beer collection. Built with React (Vite), Node.js, and PostgreSQL.
 
-## Features
+## Quick Start
 
-- View your beer collection
-- Add new beers with details
-- Remove beers from your list
-- Responsive design for mobile and desktop
-- Modern UI with Material-UI components
-- RESTful API backend with PostgreSQL database
-
-## Tech Stack
-
-### Frontend
-- React with TypeScript
-- Vite (development server, port 5173)
-- Material-UI for components
-- React Router for navigation
-- Fetch API for backend calls
-
-### Backend
-- Node.js with Express
-- TypeScript
-- PostgreSQL database
-- RESTful API architecture
-- Docker containerization
-
-## Getting Started
-
-### Prerequisites
-- Node.js (v20 or later)
-- Docker and Docker Compose
-
-### Installation
-
-1. Clone the repository:
+1. Clone and install:
 ```bash
 git clone <repository-url>
 cd beverage-tracker
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-3. Start the development environment (with Docker):
+2. Start services:
 ```bash
 docker-compose up -d
 ```
 
-This will start:
-- Frontend on http://localhost:5173 (Vite)
-- Backend on http://localhost:4000
-- PostgreSQL on port 5432
+Access the application at:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:4000
 
-### Environment Variables
+## Important Docker Commands
 
-Create a `.env` file in the backend directory with the following variables:
+```bash
+# Start all services
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# Restart a specific service
+docker-compose restart frontend
+docker-compose restart backend
+docker-compose restart db
+
+# View logs
+docker-compose logs -f [service_name]  # e.g., frontend, backend, or db
+
+# Rebuild a service after dependency changes
+docker-compose up -d --build [service_name]
+```
+
+## ⚠️ Important Warnings
+
+1. **NEVER** remove Docker volumes or the database container without backing up data first. Data loss will occur.
+2. If database data is lost, use the import script to restore:
+```bash
+# From the backend directory
+python src/misc/import_beers.py
+```
+
+## Environment Setup
+
+Create `.env` in backend directory:
 ```env
 PORT=4000
 DB_USER=postgres
@@ -68,96 +62,23 @@ DB_PASSWORD=postgres
 DB_PORT=5432
 ```
 
-## Development
+## API Endpoints
 
-The recommended way to develop is with Docker Compose, which will run both the backend and frontend in containers. The frontend uses Vite, which is configured to run on port 5173 and is accessible from your host machine.
+- `GET /api/beers` - List all beers
+- `GET /api/beers/:id` - Get single beer
+- `POST /api/beers` - Create beer
+- `PUT /api/beers/:id` - Update beer
+- `DELETE /api/beers/:id` - Delete beer
+- `GET /api/user-collections` - Get collections
+- `POST /api/user-collections` - Add to collection
+- `PUT /api/user-collections` - Update collection
 
-If you need to run the frontend or backend outside Docker, make sure to match the ports and environment variables as above.
+## Tech Stack
 
-### API Endpoints
-
-The backend provides the following RESTful endpoints:
-
-- `GET /api/beers` - Get all beers
-- `GET /api/beers/:id` - Get a single beer
-- `POST /api/beers` - Create a new beer
-- `PUT /api/beers/:id` - Update a beer
-- `DELETE /api/beers/:id` - Delete a beer
-- `GET /api/user-collections` - Get user beer collections
-- `POST /api/user-collections` - Add a beer to a user's collection
-- `PUT /api/user-collections` - Update a user's beer collection
-
-#### Beer Object Structure
-```json
-{
-  "id": number,
-  "brewery_id": number,
-  "name": string,
-  "cat_id": number,
-  "style_id": number,
-  "abv": number,
-  "ibu": number,
-  "srm": number,
-  "upc": number,
-  "filepath": string,
-  "descript": string,
-  "add_user": number,
-  "last_mod": string (timestamp)
-}
-```
-
-## Database Schema
-
-The application uses a PostgreSQL database with the following schema:
-
-```sql
-CREATE TABLE IF NOT EXISTS beers (
-    id SERIAL PRIMARY KEY,
-    brewery_id INTEGER NOT NULL DEFAULT 0,
-    name VARCHAR(255) NOT NULL DEFAULT '',
-    cat_id INTEGER NOT NULL DEFAULT 0,
-    style_id INTEGER NOT NULL DEFAULT 0,
-    abv FLOAT NOT NULL DEFAULT 0,
-    ibu FLOAT NOT NULL DEFAULT 0,
-    srm FLOAT NOT NULL DEFAULT 0,
-    upc INTEGER NOT NULL DEFAULT 0,
-    filepath VARCHAR(255) NOT NULL DEFAULT '',
-    descript TEXT NOT NULL,
-    add_user INTEGER NOT NULL DEFAULT 0,
-    last_mod TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-#### Resetting the Database
-If you change the schema, you may need to drop and recreate the table:
-```bash
-docker exec -i beverage_tracker-db-1 psql -U postgres -d beer_tracker < backend/src/db/schema.sql
-```
-
-You can also insert sample data using SQL commands or a compatible SQL file.
-
-## Troubleshooting
-
-- **Frontend not loading or blank page:**
-  - Make sure you are visiting http://localhost:5173 (not 3000).
-  - If you see a Vite welcome page or nothing loads, try restarting Docker Compose: `docker-compose down && docker-compose up -d`.
-  - Ensure no other process is using port 5173.
-  - If you change frontend dependencies, rebuild the container.
-  - Look at logs with 
-  ```
-  docker-compose logs frontend
-  docker-compose logs backend
-  docker-compose logs db 
-  ```
-- **Backend or database connection errors:**
-  - Only run the backend via Docker Compose, not directly with `npm run dev`, to ensure it can connect to the database container.
-  - If you see `getaddrinfo ENOTFOUND db`, it means the backend can't find the database container. Use Docker Compose for all services.
-
-## Building for Production
-
-```bash
-npm run build
-```
+- Frontend: React (Vite), TypeScript, Material-UI
+- Backend: Node.js, Express, TypeScript
+- Database: PostgreSQL
+- Containerization: Docker
 
 ## License
 

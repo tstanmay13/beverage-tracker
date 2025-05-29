@@ -122,7 +122,6 @@ const BeerDetails = () => {
     try {
       const isUpdate = !!userCollection;
       if (isUpdate) {
-        console.log('Updating collection:', userCollection);
         if (!userCollection?.collection_id) {
           setSnackbar({
             open: true,

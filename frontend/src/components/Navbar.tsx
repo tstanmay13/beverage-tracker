@@ -49,7 +49,7 @@ const Navbar = () => {
             <Typography
               variant="h5"
               component={RouterLink}
-              to="/"
+              to="/beers"
               sx={{
                 fontWeight: 800,
                 letterSpacing: 1,
