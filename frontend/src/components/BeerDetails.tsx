@@ -25,30 +25,40 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import colors from '../colors';
 
 interface Beer {
-  id: number;
-  brewery_id: number;
+  id: string;
   name: string;
-  cat_id: number;
-  style_id: number;
-  abv: number;
-  ibu: number;
-  srm: number;
-  upc: number;
-  filepath: string;
-  descript: string;
-  add_user: number;
-  last_mod: string;
+  name_display?: string;
+  description?: string;
+  abv?: number;
+  ibu?: number;
+  srm?: number;
+  style_id?: number;
+  style_name?: string;
+  available_id?: number;
+  availability_name?: string;
+  glassware_id?: number;
+  glassware_name?: string;
+  is_organic?: boolean;
+  is_retired?: boolean;
+  labels?: {
+    icon?: string;
+    medium?: string;
+    large?: string;
+    contentAwareIcon?: string;
+    contentAwareMedium?: string;
+    contentAwareLarge?: string;
+  };
+  status?: string;
+  status_display?: string;
+  create_date?: string;
+  update_date?: string;
 }
 
 interface UserCollection {
-  id: number;
-  user_id: number;
-  beer_id: number;
+  collection_id: number;
+  beer_id: string;
   rating: number;
   notes: string;
-  created_at: string;
-  updated_at: string;
-  collection_id: number;
 }
 
 const BeerDetails = () => {
@@ -85,7 +95,7 @@ const BeerDetails = () => {
           const collectionResponse = await fetch(`http://localhost:4000/api/user-collections/1`);
           if (collectionResponse.ok) {
             const collectionData = await collectionResponse.json();
-            const userBeer = collectionData.find((item: UserCollection) => item.beer_id === parseInt(id!));
+            const userBeer = collectionData.find((item: UserCollection) => item.beer_id === id);
             if (userBeer) {
               setUserCollection(userBeer);
               setRating(userBeer.rating);
@@ -104,59 +114,39 @@ const BeerDetails = () => {
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    fetchData();
   }, [id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/user-collections' + (userCollection ? `/${userCollection.collection_id}` : ''), {
+      const response = await fetch('http://localhost:4000/api/user-collections', {
         method: userCollection ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: 1,
-          beer_id: parseInt(id!),
+          user_id: 1, // Hardcoded for demo; replace with actual user ID
+          beer_id: id,
           rating,
           notes,
         }),
       });
+
       if (!response.ok) {
-        if (response.status === 409) {
-          setSnackbar({
-            open: true,
-            message: 'Beer is already in your collection!',
-            severity: 'error'
-          });
-          return;
-        }
-        throw new Error('Failed to update user collection');
+        throw new Error('Failed to save to collection');
       }
+
       setSnackbar({
         open: true,
-        message: userCollection ? 'Collection updated successfully!' : 'Beer added to your collection!',
-        severity: 'success'
+        message: 'Successfully saved to your collection!',
+        severity: 'success',
       });
-      // If it was an add, refetch collection info
-      if (!userCollection) {
-        const collectionResponse = await fetch(`http://localhost:4000/api/user-collections/1`);
-        if (collectionResponse.ok) {
-          const collectionData = await collectionResponse.json();
-          const userBeer = collectionData.find((item: UserCollection) => item.beer_id === parseInt(id!));
-          if (userBeer) {
-            setUserCollection(userBeer);
-          }
-        }
-      }
     } catch (error) {
-      console.error('Error updating user collection:', error);
+      console.error('Error saving to collection:', error);
       setSnackbar({
         open: true,
-        message: 'Failed to update collection',
-        severity: 'error'
+        message: 'Failed to save to collection. Please try again.',
+        severity: 'error',
       });
     }
   };
@@ -210,41 +200,37 @@ const BeerDetails = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
-      <IconButton
-        onClick={() => navigate(-1)}
-        sx={{ 
-          mb: 2, 
-          color: colors.earthBrown, 
-          background: 'rgba(210,180,140,0.10)', 
-          borderRadius: 2, 
-          '&:hover': { 
-            background: 'rgba(210,180,140,0.18)',
-            transform: 'scale(1.05)',
-          },
-          transition: 'all 0.2s',
-        }}
-      >
-        <ArrowBackIcon />
-      </IconButton>
+      <Box sx={{ mb: 4 }}>
+        <IconButton 
+          onClick={() => navigate(-1)}
+          sx={{ 
+            color: colors.earthBrown,
+            '&:hover': {
+              background: 'rgba(210,180,140,0.12)',
+            },
+          }}
+        >
+          <ArrowBackIcon />
+        </IconButton>
+      </Box>
 
       <Paper 
         elevation={0}
         sx={{ 
-          p: { xs: 2, md: 6 },
-          borderRadius: 6,
+          p: { xs: 3, md: 6 },
+          borderRadius: 4,
           background: 'rgba(210,180,140,0.35)',
           backdropFilter: 'blur(10px)',
           border: '1.5px solid rgba(210,180,140,0.18)',
-          boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.18)',
-          transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
+          boxShadow: '0 4px 24px 0 rgba(139, 115, 85, 0.15)',
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 6 }}>
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Box
               component="img"
-              src={beer.filepath || 'https://via.placeholder.com/400x600'}
-              alt={beer.name}
+              src={beer.labels?.large || beer.labels?.medium || 'https://via.placeholder.com/400x600'}
+              alt={beer.name_display || beer.name}
               sx={{
                 width: '100%',
                 maxWidth: 340,
@@ -263,26 +249,39 @@ const BeerDetails = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
               <SportsBarIcon sx={{ fontSize: 32, color: colors.earthTan }} />
               <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
-                {beer.name}
+                {beer.name_display || beer.name}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
-              <Chip 
-                icon={<InfoIcon sx={{ color: colors.white }} />}
-                label={`${beer.abv}% ABV`}
-                sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
-              />
-              <Chip 
-                icon={<InfoIcon sx={{ color: colors.earthBrown }} />}
-                label={`${beer.ibu} IBU`}
-                sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
-              />
-              <Chip 
-                icon={<InfoIcon sx={{ color: colors.earthTan }} />}
-                label={`${beer.srm} SRM`}
-                sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
-              />
+              {beer.abv && (
+                <Chip 
+                  icon={<InfoIcon sx={{ color: colors.white }} />}
+                  label={`${beer.abv}% ABV`}
+                  sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
+                />
+              )}
+              {beer.ibu && (
+                <Chip 
+                  icon={<InfoIcon sx={{ color: colors.earthBrown }} />}
+                  label={`${beer.ibu} IBU`}
+                  sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                />
+              )}
+              {beer.srm && (
+                <Chip 
+                  icon={<InfoIcon sx={{ color: colors.earthTan }} />}
+                  label={`${beer.srm} SRM`}
+                  sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                />
+              )}
+              {beer.style_name && (
+                <Chip 
+                  icon={<InfoIcon sx={{ color: colors.earthBrown }} />}
+                  label={beer.style_name}
+                  sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                />
+              )}
             </Box>
 
             <Typography 
@@ -296,93 +295,73 @@ const BeerDetails = () => {
                 fontWeight: 500,
               }}
             >
-              {beer.descript}
+              {beer.description}
             </Typography>
 
             <Divider sx={{ my: 3, background: colors.earthTan, opacity: 0.3 }} />
 
-            <Box component="form" onSubmit={handleSubmit} noValidate>
+            <Box sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: colors.earthBrown, fontWeight: 600 }}>
+                Add to Your Collection
+              </Typography>
               <Box sx={{ mb: 3 }}>
-                <Typography 
-                  component="legend" 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    mb: 1,
-                    color: colors.earthBrown,
-                    fontWeight: 700,
-                  }}
-                >
-                  Your Rating
-                  <Tooltip title="Rate this beer from 1 to 5 stars">
-                    <InfoIcon fontSize="small" sx={{ color: colors.earthTan }} />
-                  </Tooltip>
-                </Typography>
+                <Typography component="legend" sx={{ mb: 1, color: colors.earthBrown }}>Rating</Typography>
                 <Rating
                   value={rating}
+                  onChange={(_, newValue) => setRating(newValue || 0)}
                   precision={0.5}
-                  onChange={(_, newValue) => {
-                    setRating(newValue || 0);
-                  }}
-                  icon={<FavoriteIcon fontSize="inherit" sx={{ color: colors.earthTan }} />}
-                  emptyIcon={<FavoriteBorderIcon fontSize="inherit" sx={{ color: colors.white }} />}
                   sx={{
                     '& .MuiRating-iconFilled': {
                       color: colors.earthTan,
                     },
                     '& .MuiRating-iconHover': {
-                      color: colors.earthBrown,
+                      color: colors.earthTan,
                     },
                   }}
                 />
               </Box>
-
               <TextField
-                margin="normal"
                 fullWidth
-                label="Tasting Notes"
                 multiline
                 rows={4}
+                label="Notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 sx={{
+                  mb: 3,
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
-                    background: '#f8f9fa',
-                    boxShadow: colors.cardShadow,
+                    borderRadius: 2,
+                    background: colors.white,
+                    '& fieldset': {
+                      borderColor: colors.earthTan,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.earthBrown,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.earthBrown,
+                    },
                   },
                   '& .MuiInputLabel-root': {
                     color: colors.earthBrown,
                   },
                 }}
               />
-
               <Button
-                type="submit"
-                fullWidth
                 variant="contained"
                 startIcon={<SaveIcon />}
-                sx={{ 
-                  mt: 3, 
-                  mb: 2,
-                  py: 1.5,
-                  borderRadius: 9999,
-                  textTransform: 'none',
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
-                  background: `linear-gradient(90deg, ${colors.earthBrown} 0%, ${colors.earthTan} 100%)`,
-                  color: colors.white,
-                  boxShadow: colors.cardShadow,
+                onClick={handleSave}
+                sx={{
+                  background: colors.earthTan,
+                  color: colors.earthBrown,
+                  fontWeight: 600,
                   '&:hover': {
-                    background: `linear-gradient(90deg, ${colors.earthTan} 0%, ${colors.earthBrown} 100%)`,
-                    color: colors.white,
-                    transform: 'translateY(-2px)',
+                    background: colors.earthBrown,
+                    color: colors.earthTan,
                   },
-                  transition: 'all 0.2s',
                 }}
               >
-                {userCollection ? 'Update Rating' : 'Add to Collection'}
+                {userCollection ? 'Update Collection' : 'Add to Collection'}
               </Button>
             </Box>
           </Box>
@@ -413,4 +392,4 @@ const BeerDetails = () => {
   );
 };
 
-export default BeerDetails; 
+export default BeerDetails;

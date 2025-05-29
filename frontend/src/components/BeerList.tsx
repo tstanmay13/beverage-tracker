@@ -29,19 +29,33 @@ import InfoIcon from '@mui/icons-material/Info';
 import colors from '../colors';
 
 interface Beer {
-  id: number;
-  brewery_id: number;
+  id: string;
   name: string;
-  cat_id: number;
-  style_id: number;
-  abv: number;
-  ibu: number;
-  srm: number;
-  upc: number;
-  filepath: string;
-  descript: string;
-  add_user: number;
-  last_mod: string;
+  name_display?: string;
+  description?: string;
+  abv?: number;
+  ibu?: number;
+  srm?: number;
+  style_id?: number;
+  style_name?: string;
+  available_id?: number;
+  availability_name?: string;
+  glassware_id?: number;
+  glassware_name?: string;
+  is_organic?: boolean;
+  is_retired?: boolean;
+  labels?: {
+    icon?: string;
+    medium?: string;
+    large?: string;
+    contentAwareIcon?: string;
+    contentAwareMedium?: string;
+    contentAwareLarge?: string;
+  };
+  status?: string;
+  status_display?: string;
+  create_date?: string;
+  update_date?: string;
 }
 
 interface PaginationInfo {
@@ -268,8 +282,8 @@ const BeerList = () => {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={beer.filepath || 'https://via.placeholder.com/150'}
-                  alt={beer.name}
+                  image={beer.labels?.medium || beer.labels?.large || 'https://via.placeholder.com/150'}
+                  alt={beer.name_display || beer.name}
                   sx={{
                     objectFit: 'cover',
                     transition: 'transform 0.3s cubic-bezier(.4,2,.3,1)',
@@ -280,19 +294,30 @@ const BeerList = () => {
                 />
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
-                    {beer.name}
+                    {beer.name_display || beer.name}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                    <Chip 
-                      label={`${beer.abv}% ABV`} 
-                      size="small" 
-                      sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
-                    />
-                    <Chip 
-                      label={`${beer.ibu} IBU`} 
-                      size="small" 
-                      sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
-                    />
+                  <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                    {beer.abv && (
+                      <Chip 
+                        label={`${beer.abv}% ABV`} 
+                        size="small" 
+                        sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
+                      />
+                    )}
+                    {beer.ibu && (
+                      <Chip 
+                        label={`${beer.ibu} IBU`} 
+                        size="small" 
+                        sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                      />
+                    )}
+                    {beer.style_name && (
+                      <Chip 
+                        label={beer.style_name}
+                        size="small"
+                        sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                      />
+                    )}
                   </Box>
                   <Typography 
                     variant="body2" 
@@ -306,7 +331,7 @@ const BeerList = () => {
                       WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    {beer.descript}
+                    {beer.description}
                   </Typography>
                 </CardContent>
               </Card>
@@ -347,4 +372,4 @@ const BeerList = () => {
   );
 };
 
-export default BeerList; 
+export default BeerList;
