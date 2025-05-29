@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress, Chip, Alert } from '@mui/material';
+import { 
+  Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress, 
+  Chip, Alert, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  List, ListItem, ListItemText, ListItemAvatar, Avatar, Checkbox, ToggleButton, ToggleButtonGroup,
+  Paper, Divider
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SportsBarIcon from '@mui/icons-material/SportsBar';
+import DeleteIcon from '@mui/icons-material/Delete';
+import GridViewIcon from '@mui/icons-material/GridView';
+import ViewListIcon from '@mui/icons-material/ViewList';
 import colors from '../colors';
 
 interface Beer {
@@ -41,6 +49,11 @@ const MyCollection = () => {
   const [beers, setBeers] = useState<Beer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [beerToDelete, setBeerToDelete] = useState<Beer | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedBeers, setSelectedBeers] = useState<Set<number>>(new Set());
+  const [multiDeleteDialogOpen, setMultiDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,6 +100,72 @@ const MyCollection = () => {
 
     fetchCollection();
   }, []);
+
+  const handleDeleteClick = (beer: Beer, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    setBeerToDelete(beer);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!beerToDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:4000/api/user-collections/${beerToDelete.collection_id}`);
+      setBeers(beers.filter(b => b.collection_id !== beerToDelete.collection_id));
+      setDeleteDialogOpen(false);
+      setBeerToDelete(null);
+    } catch (error) {
+      console.error('Error deleting beer from collection:', error);
+      setError('Failed to delete beer from collection. Please try again.');
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setBeerToDelete(null);
+  };
+
+  const handleViewModeChange = (event: React.MouseEvent<HTMLElement>, newMode: 'grid' | 'list') => {
+    if (newMode !== null) {
+      setViewMode(newMode);
+    }
+  };
+
+  const handleSelectBeer = (collectionId: number) => {
+    setSelectedBeers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(collectionId)) {
+        newSet.delete(collectionId);
+      } else {
+        newSet.add(collectionId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedBeers.size === beers.length) {
+      setSelectedBeers(new Set());
+    } else {
+      setSelectedBeers(new Set(beers.map(beer => beer.collection_id)));
+    }
+  };
+
+  const handleMultiDelete = async () => {
+    try {
+      const deletePromises = Array.from(selectedBeers).map(id =>
+        axios.delete(`http://localhost:4000/api/user-collections/${id}`)
+      );
+      await Promise.all(deletePromises);
+      setBeers(beers.filter(b => !selectedBeers.has(b.collection_id)));
+      setSelectedBeers(new Set());
+      setMultiDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Error deleting beers:', error);
+      setError('Failed to delete some beers. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -140,59 +219,164 @@ const MyCollection = () => {
     );
   }
 
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
-          My Beer Collection
-        </Typography>
-      </Box>
-      <Grid container spacing={4}>
-        {beers.map((beer) => (
-          <Grid 
-            key={beer.id}
-            item
-            xs={12}
-            sm={6}
-            md={4}
+  const renderGridView = () => (
+    <Grid container spacing={4}>
+      {beers.map((beer) => (
+        <Grid 
+          key={beer.id}
+          item
+          xs={12}
+          sm={6}
+          md={4}
+        >
+          <Card
+            onClick={() => navigate(`/beer/${beer.beer_id}`)}
+            sx={{
+              cursor: 'pointer',
+              borderRadius: 4,
+              background: 'rgba(210,180,140,0.35)',
+              backdropFilter: 'blur(10px)',
+              border: '1.5px solid rgba(210,180,140,0.18)',
+              boxShadow: '0 4px 24px 0 rgba(139, 115, 85, 0.15)',
+              transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              '&:hover': {
+                boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
+                transform: 'translateY(-8px) scale(1.04)',
+                border: '1.5px solid rgba(210,180,140,0.28)',
+              },
+            }}
           >
-            <Card
-              onClick={() => navigate(`/beer/${beer.beer_id}`)}
+            <IconButton
+              onClick={(e) => handleDeleteClick(beer, e)}
               sx={{
-                cursor: 'pointer',
-                borderRadius: 4,
-                background: 'rgba(210,180,140,0.35)',
-                backdropFilter: 'blur(10px)',
-                border: '1.5px solid rgba(210,180,140,0.18)',
-                boxShadow: '0 4px 24px 0 rgba(139, 115, 85, 0.15)',
-                transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                background: 'rgba(255, 255, 255, 0.9)',
                 '&:hover': {
-                  boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
-                  transform: 'translateY(-8px) scale(1.04)',
-                  border: '1.5px solid rgba(210,180,140,0.28)',
+                  background: 'rgba(255, 255, 255, 1)',
                 },
               }}
             >
-              <CardMedia
-                component="img"
-                height="200"
-                image={beer.labels?.medium || beer.labels?.large || '/default-beer.jpg'}
-                alt={beer.name_display || beer.name}
-                sx={{
-                  objectFit: 'cover',
-                  borderTopLeftRadius: 4,
-                  borderTopRightRadius: 4,
-                }}
+              <DeleteIcon sx={{ color: colors.earthBrown }} />
+            </IconButton>
+            <CardMedia
+              component="img"
+              height="200"
+              image={beer.labels?.medium || beer.labels?.large || '/default-beer.jpg'}
+              alt={beer.name_display || beer.name}
+              sx={{
+                objectFit: 'cover',
+                borderTopLeftRadius: 4,
+                borderTopRightRadius: 4,
+              }}
+            />
+            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+              <Typography gutterBottom variant="h6" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
+                {beer.name}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                <Chip
+                  label={`${beer.abv}% ABV`}
+                  size="small"
+                  sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
+                />
+                <Chip
+                  label={`Rating: ${beer.rating ?? 'N/A'}`}
+                  size="small"
+                  sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                />
+                {beer.style_name && (
+                  <Chip
+                    label={beer.style_name}
+                    size="small"
+                    sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                  />
+                )}
+              </Box>
+              {beer.notes && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: colors.earthBrown,
+                    opacity: 0.8,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                >
+                  {beer.notes}
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  const renderListView = () => (
+    <Paper 
+      elevation={0}
+      sx={{ 
+        borderRadius: 4,
+        background: 'rgba(210,180,140,0.35)',
+        backdropFilter: 'blur(10px)',
+        border: '1.5px solid rgba(210,180,140,0.18)',
+      }}
+    >
+      <List>
+        {beers.map((beer, index) => (
+          <ListItem
+            key={beer.id}
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                background: 'rgba(210,180,140,0.1)',
+              },
+            }}
+            secondaryAction={
+              <IconButton
+                edge="end"
+                onClick={(e) => handleDeleteClick(beer, e)}
+                sx={{ color: colors.earthBrown }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            }
+          >
+            <Checkbox
+              checked={selectedBeers.has(beer.collection_id)}
+              onChange={() => handleSelectBeer(beer.collection_id)}
+              onClick={(e) => e.stopPropagation()}
+              sx={{
+                color: colors.earthTan,
+                '&.Mui-checked': {
+                  color: colors.earthBrown,
+                },
+              }}
+            />
+            <ListItemAvatar>
+              <Avatar
+                src={beer.labels?.medium || beer.labels?.large}
+                alt={beer.name}
+                sx={{ width: 60, height: 60, mr: 2 }}
               />
-              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <Typography gutterBottom variant="h6" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <Typography variant="h6" sx={{ color: colors.earthBrown, fontWeight: 600 }}>
                   {beer.name}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+              }
+              secondary={
+                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                   <Chip
                     label={`${beer.abv}% ABV`}
                     size="small"
@@ -211,27 +395,156 @@ const MyCollection = () => {
                     />
                   )}
                 </Box>
-                {beer.notes && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: colors.earthBrown,
-                      opacity: 0.8,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {beer.notes}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+              }
+            />
+          </ListItem>
         ))}
-      </Grid>
+      </List>
+    </Paper>
+  );
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
+            My Beer Collection
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {selectedBeers.size > 0 && (
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => setMultiDeleteDialogOpen(true)}
+              sx={{
+                background: colors.earthBrown,
+                '&:hover': {
+                  background: colors.earthTan,
+                },
+              }}
+            >
+              Delete Selected ({selectedBeers.size})
+            </Button>
+          )}
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={handleViewModeChange}
+            aria-label="view mode"
+            size="small"
+          >
+            <ToggleButton value="grid" aria-label="grid view">
+              <GridViewIcon />
+            </ToggleButton>
+            <ToggleButton value="list" aria-label="list view">
+              <ViewListIcon />
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      </Box>
+
+      {viewMode === 'grid' ? renderGridView() : renderListView()}
+
+      {/* Single Delete Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            background: colors.white,
+            boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: colors.earthBrown, fontWeight: 600 }}>
+          Remove from Collection
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: colors.earthBrown }}>
+            Are you sure you want to remove {beerToDelete?.name} from your collection?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={handleDeleteCancel}
+            sx={{
+              color: colors.earthBrown,
+              '&:hover': {
+                background: 'rgba(210,180,140,0.1)',
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            sx={{
+              background: colors.earthTan,
+              color: colors.earthBrown,
+              fontWeight: 600,
+              '&:hover': {
+                background: colors.earthBrown,
+                color: colors.earthTan,
+              },
+            }}
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Multiple Delete Dialog */}
+      <Dialog
+        open={multiDeleteDialogOpen}
+        onClose={() => setMultiDeleteDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            background: colors.white,
+            boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: colors.earthBrown, fontWeight: 600 }}>
+          Remove Multiple Beers
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: colors.earthBrown }}>
+            Are you sure you want to remove {selectedBeers.size} beers from your collection?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setMultiDeleteDialogOpen(false)}
+            sx={{
+              color: colors.earthBrown,
+              '&:hover': {
+                background: 'rgba(210,180,140,0.1)',
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleMultiDelete}
+            variant="contained"
+            color="error"
+            sx={{
+              background: colors.earthBrown,
+              '&:hover': {
+                background: colors.earthTan,
+              },
+            }}
+          >
+            Remove All
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
