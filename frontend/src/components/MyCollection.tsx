@@ -60,7 +60,7 @@ const MyCollection = () => {
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress sx={{ color: colors.beerGold }} />
+        <CircularProgress sx={{ color: colors.earthTan }} />
       </Container>
     );
   }
@@ -71,10 +71,10 @@ const MyCollection = () => {
         <Alert 
           severity="error"
           sx={{
-            background: colors.beerFoam,
-            color: colors.beerDeep,
+            background: colors.white,
+            color: colors.earthBrown,
             '& .MuiAlert-icon': {
-              color: colors.beerAmber,
+              color: colors.earthTan,
             },
           }}
         >
@@ -88,18 +88,18 @@ const MyCollection = () => {
     return (
       <Container sx={{ mt: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.beerDeep, letterSpacing: 1 }}>
+          <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
             My Beer Collection
           </Typography>
         </Box>
         <Alert 
           severity="info"
           sx={{
-            background: colors.beerFoam,
-            color: colors.beerDeep,
+            background: colors.white,
+            color: colors.earthBrown,
             '& .MuiAlert-icon': {
-              color: colors.beerGold,
+              color: colors.earthTan,
             },
           }}
         >
@@ -112,8 +112,8 @@ const MyCollection = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.beerDeep, letterSpacing: 1 }}>
+        <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
           My Beer Collection
         </Typography>
       </Box>
@@ -128,11 +128,10 @@ const MyCollection = () => {
           >
             <Card
               onClick={() => navigate(`/beer/${beer.beer_id}`)}
-              className="glass-card"
               sx={{
                 cursor: 'pointer',
                 borderRadius: 4,
-                background: colors.gradient,
+                background: colors.white,
                 boxShadow: colors.cardShadow,
                 transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
                 height: '100%',
@@ -144,7 +143,50 @@ const MyCollection = () => {
                 },
               }}
             >
-              {/* ... rest of the card content ... */}
+              <CardMedia
+                component="img"
+                height="200"
+                image={beer.imageUrl || '/default-beer.jpg'}
+                alt={beer.name}
+                sx={{
+                  objectFit: 'cover',
+                  borderTopLeftRadius: 4,
+                  borderTopRightRadius: 4,
+                }}
+              />
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography gutterBottom variant="h6" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
+                  {beer.name}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                  <Chip
+                    label={`${beer.abv}% ABV`}
+                    size="small"
+                    sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
+                  />
+                  <Chip
+                    label={`Rating: ${beer.rating ?? 'N/A'}`}
+                    size="small"
+                    sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                  />
+                </Box>
+                {beer.notes && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.earthBrown,
+                      opacity: 0.8,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {beer.notes}
+                  </Typography>
+                )}
+              </CardContent>
             </Card>
           </Grid>
         ))}

@@ -107,7 +107,7 @@ const BeerList = () => {
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
       {[...Array(6)].map((_, index) => (
         <Box key={index} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
-          <Card sx={{ height: '100%' }}>
+          <Card sx={{ height: '100%', background: colors.white, borderRadius: 4, boxShadow: colors.cardShadow }}>
             <Skeleton variant="rectangular" height={200} />
             <CardContent>
               <Skeleton variant="text" height={40} />
@@ -123,8 +123,8 @@ const BeerList = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: colors.beerDeep, letterSpacing: 1 }}>
+        <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: colors.earthBrown, letterSpacing: 1 }}>
           Beer Catalog
         </Typography>
       </Box>
@@ -132,12 +132,11 @@ const BeerList = () => {
       {/* Search and Filters */}
       <Paper 
         elevation={0}
-        className="glass-card"
         sx={{ 
           p: { xs: 2, md: 4 }, 
           mb: 4,
           borderRadius: 4,
-          background: colors.gradient,
+          background: colors.white,
           boxShadow: colors.cardShadow,
         }}
       >
@@ -150,18 +149,18 @@ const BeerList = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: colors.beerGold }} />
+                  <SearchIcon sx={{ color: colors.earthTan }} />
                 </InputAdornment>
               ),
             }}
             sx={{ 
               '& .MuiOutlinedInput-root': {
                 borderRadius: 3,
-                background: 'rgba(255,251,233,0.7)',
+                background: '#f8f9fa',
                 boxShadow: colors.cardShadow,
               },
               '& .MuiInputLabel-root': {
-                color: colors.beerDeep,
+                color: colors.earthBrown,
               },
             }}
           />
@@ -169,13 +168,13 @@ const BeerList = () => {
             <IconButton 
               onClick={() => setShowFilters(!showFilters)}
               sx={{
-                color: showFilters ? colors.beerGold : colors.beerDeep,
-                background: showFilters ? 'rgba(251,191,36,0.12)' : 'transparent',
+                color: showFilters ? colors.earthTan : colors.earthBrown,
+                background: showFilters ? 'rgba(210,180,140,0.12)' : 'transparent',
                 borderRadius: 2,
                 transition: 'all 0.2s',
                 '&:hover': {
-                  background: 'rgba(251,191,36,0.18)',
-                  color: colors.beerDeep,
+                  background: 'rgba(210,180,140,0.18)',
+                  color: colors.earthBrown,
                 },
               }}
             >
@@ -194,10 +193,10 @@ const BeerList = () => {
             transition: 'all 0.3s ease-in-out'
           }}>
             <Box sx={{ flex: '1 1 300px' }}>
-              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: colors.beerDeep, fontWeight: 600 }}>
+              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: colors.earthBrown, fontWeight: 600 }}>
                 ABV Range
                 <Tooltip title="Alcohol by Volume">
-                  <InfoIcon fontSize="small" sx={{ color: colors.beerGold }} />
+                  <InfoIcon fontSize="small" sx={{ color: colors.earthTan }} />
                 </Tooltip>
               </Typography>
               <Slider
@@ -208,7 +207,7 @@ const BeerList = () => {
                 max={15}
                 step={0.1}
                 sx={{
-                  color: colors.beerGold,
+                  color: colors.earthTan,
                   '& .MuiSlider-thumb': {
                     transition: 'transform 0.2s',
                     '&:hover': {
@@ -218,18 +217,18 @@ const BeerList = () => {
                 }}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Chip label={`${abvRange[0]}%`} size="small" sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 600 }} />
-                <Chip label={`${abvRange[1]}%`} size="small" sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 600 }} />
+                <Chip label={`${abvRange[0]}%`} size="small" sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 600 }} />
+                <Chip label={`${abvRange[1]}%`} size="small" sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 600 }} />
               </Box>
             </Box>
             <Box sx={{ flex: '1 1 300px' }}>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: colors.beerDeep }}>Style</InputLabel>
+                <InputLabel sx={{ color: colors.earthBrown }}>Style</InputLabel>
                 <Select
                   value={styleId}
                   label="Style"
                   onChange={(e) => setStyleId(e.target.value)}
-                  sx={{ borderRadius: 3, background: 'rgba(255,251,233,0.7)' }}
+                  sx={{ borderRadius: 3, background: '#f8f9fa' }}
                 >
                   <MenuItem value="">All Styles</MenuItem>
                   <MenuItem value="1">Lager</MenuItem>
@@ -260,7 +259,7 @@ const BeerList = () => {
                   textDecoration: 'none',
                   borderRadius: 4,
                   overflow: 'hidden',
-                  background: colors.gradient,
+                  background: colors.white,
                   boxShadow: colors.cardShadow,
                   transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
                   '&:hover': {
@@ -283,25 +282,25 @@ const BeerList = () => {
                   }}
                 />
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold', color: colors.beerDeep }}>
+                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
                     {beer.name}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                     <Chip 
                       label={`${beer.abv}% ABV`} 
                       size="small" 
-                      sx={{ background: colors.beerGold, color: colors.beerFoam, fontWeight: 700 }}
+                      sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
                     />
                     <Chip 
                       label={`${beer.ibu} IBU`} 
                       size="small" 
-                      sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 700 }}
+                      sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
                     />
                   </Box>
                   <Typography 
                     variant="body2" 
                     sx={{
-                      color: colors.beerDeep,
+                      color: colors.earthBrown,
                       opacity: 0.8,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -330,18 +329,18 @@ const BeerList = () => {
           sx={{
             '& .MuiPaginationItem-root': {
               borderRadius: 2,
-              background: 'rgba(255,251,233,0.7)',
-              color: colors.beerDeep,
+              background: '#f8f9fa',
+              color: colors.earthBrown,
               fontWeight: 600,
               mx: 0.5,
               transition: 'all 0.2s',
               '&.Mui-selected': {
-                background: colors.beerGold,
-                color: colors.beerFoam,
+                background: colors.earthTan,
+                color: colors.earthBrown,
               },
               '&:hover': {
-                background: colors.beerGold,
-                color: colors.beerFoam,
+                background: colors.earthTan,
+                color: colors.earthBrown,
               },
             },
           }}

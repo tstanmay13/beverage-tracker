@@ -163,12 +163,12 @@ const BeerDetails = () => {
 
   const LoadingSkeleton = () => (
     <Box sx={{ width: '100%' }}>
-      <Skeleton variant="rectangular" height={300} sx={{ mb: 2, borderRadius: 4, background: colors.beerFoam }} />
-      <Skeleton variant="text" height={60} width="60%" sx={{ mb: 2, background: colors.beerFoam }} />
-      <Skeleton variant="text" height={20} width="40%" sx={{ mb: 1, background: colors.beerFoam }} />
-      <Skeleton variant="text" height={20} width="80%" sx={{ mb: 1, background: colors.beerFoam }} />
-      <Skeleton variant="text" height={20} width="70%" sx={{ mb: 1, background: colors.beerFoam }} />
-      <Skeleton variant="rectangular" height={200} sx={{ mb: 2, borderRadius: 4, background: colors.beerFoam }} />
+      <Skeleton variant="rectangular" height={300} sx={{ mb: 2, borderRadius: 4, background: colors.earthTan }} />
+      <Skeleton variant="text" height={60} width="60%" sx={{ mb: 2, background: colors.earthTan }} />
+      <Skeleton variant="text" height={20} width="40%" sx={{ mb: 1, background: colors.earthTan }} />
+      <Skeleton variant="text" height={20} width="80%" sx={{ mb: 1, background: colors.earthTan }} />
+      <Skeleton variant="text" height={20} width="70%" sx={{ mb: 1, background: colors.earthTan }} />
+      <Skeleton variant="rectangular" height={200} sx={{ mb: 2, borderRadius: 4, background: colors.earthTan }} />
     </Box>
   );
 
@@ -191,10 +191,10 @@ const BeerDetails = () => {
             </Button>
           }
           sx={{
-            background: colors.beerFoam,
-            color: colors.beerDeep,
+            background: colors.white,
+            color: colors.earthBrown,
             '& .MuiAlert-icon': {
-              color: colors.beerAmber,
+              color: colors.earthTan,
             },
           }}
         >
@@ -214,11 +214,11 @@ const BeerDetails = () => {
         onClick={() => navigate(-1)}
         sx={{ 
           mb: 2, 
-          color: colors.beerDeep, 
-          background: 'rgba(251,191,36,0.10)', 
+          color: colors.earthBrown, 
+          background: 'rgba(210,180,140,0.10)', 
           borderRadius: 2, 
           '&:hover': { 
-            background: 'rgba(251,191,36,0.18)',
+            background: 'rgba(210,180,140,0.18)',
             transform: 'scale(1.05)',
           },
           transition: 'all 0.2s',
@@ -229,11 +229,10 @@ const BeerDetails = () => {
 
       <Paper 
         elevation={0}
-        className="glass-card"
         sx={{ 
           p: { xs: 2, md: 6 },
           borderRadius: 6,
-          background: colors.gradient,
+          background: colors.gradientHero,
           boxShadow: colors.glassShadow,
         }}
       >
@@ -250,7 +249,7 @@ const BeerDetails = () => {
                 borderRadius: 4,
                 boxShadow: colors.cardShadow,
                 transition: 'transform 0.3s cubic-bezier(.4,2,.3,1)',
-                background: colors.beerFoam,
+                background: colors.earthTan,
                 '&:hover': {
                   transform: 'scale(1.03)',
                 },
@@ -259,27 +258,27 @@ const BeerDetails = () => {
           </Box>
           <Box sx={{ flex: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <LocalBarIcon sx={{ fontSize: 32, color: colors.beerGold }} />
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.beerDeep, letterSpacing: 1 }}>
+              <LocalBarIcon sx={{ fontSize: 32, color: colors.earthTan }} />
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
                 {beer.name}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
               <Chip 
-                icon={<InfoIcon sx={{ color: colors.beerFoam }} />}
+                icon={<InfoIcon sx={{ color: colors.white }} />}
                 label={`${beer.abv}% ABV`}
-                sx={{ background: colors.beerGold, color: colors.beerFoam, fontWeight: 700 }}
+                sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
               />
               <Chip 
-                icon={<InfoIcon sx={{ color: colors.beerDeep }} />}
+                icon={<InfoIcon sx={{ color: colors.earthBrown }} />}
                 label={`${beer.ibu} IBU`}
-                sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 700 }}
+                sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
               />
               <Chip 
-                icon={<InfoIcon sx={{ color: colors.beerGold }} />}
+                icon={<InfoIcon sx={{ color: colors.earthTan }} />}
                 label={`${beer.srm} SRM`}
-                sx={{ background: colors.beerAccent, color: colors.beerDeep, fontWeight: 700 }}
+                sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
               />
             </Box>
 
@@ -289,7 +288,7 @@ const BeerDetails = () => {
               sx={{ 
                 mb: 3,
                 lineHeight: 1.7,
-                color: colors.beerDeep,
+                color: colors.earthBrown,
                 opacity: 0.85,
                 fontWeight: 500,
               }}
@@ -297,7 +296,7 @@ const BeerDetails = () => {
               {beer.descript}
             </Typography>
 
-            <Divider sx={{ my: 3, background: colors.beerGold, opacity: 0.3 }} />
+            <Divider sx={{ my: 3, background: colors.earthTan, opacity: 0.3 }} />
 
             <Box component="form" onSubmit={handleSubmit} noValidate>
               <Box sx={{ mb: 3 }}>
@@ -308,13 +307,13 @@ const BeerDetails = () => {
                     alignItems: 'center', 
                     gap: 1,
                     mb: 1,
-                    color: colors.beerDeep,
+                    color: colors.earthBrown,
                     fontWeight: 700,
                   }}
                 >
                   Your Rating
                   <Tooltip title="Rate this beer from 1 to 5 stars">
-                    <InfoIcon fontSize="small" sx={{ color: colors.beerGold }} />
+                    <InfoIcon fontSize="small" sx={{ color: colors.earthTan }} />
                   </Tooltip>
                 </Typography>
                 <Rating
@@ -323,14 +322,14 @@ const BeerDetails = () => {
                   onChange={(_, newValue) => {
                     setRating(newValue || 0);
                   }}
-                  icon={<FavoriteIcon fontSize="inherit" sx={{ color: colors.beerGold }} />}
-                  emptyIcon={<FavoriteBorderIcon fontSize="inherit" sx={{ color: colors.beerFoam }} />}
+                  icon={<FavoriteIcon fontSize="inherit" sx={{ color: colors.earthTan }} />}
+                  emptyIcon={<FavoriteBorderIcon fontSize="inherit" sx={{ color: colors.white }} />}
                   sx={{
                     '& .MuiRating-iconFilled': {
-                      color: colors.beerGold,
+                      color: colors.earthTan,
                     },
                     '& .MuiRating-iconHover': {
-                      color: colors.beerAccent,
+                      color: colors.earthBrown,
                     },
                   }}
                 />
@@ -347,11 +346,11 @@ const BeerDetails = () => {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 3,
-                    background: 'rgba(255,251,233,0.7)',
+                    background: '#f8f9fa',
                     boxShadow: colors.cardShadow,
                   },
                   '& .MuiInputLabel-root': {
-                    color: colors.beerDeep,
+                    color: colors.earthBrown,
                   },
                 }}
               />
@@ -369,12 +368,12 @@ const BeerDetails = () => {
                   textTransform: 'none',
                   fontSize: '1.1rem',
                   fontWeight: 700,
-                  background: colors.gradientButton,
-                  color: colors.beerFoam,
+                  background: `linear-gradient(90deg, ${colors.earthBrown} 0%, ${colors.earthTan} 100%)`,
+                  color: colors.white,
                   boxShadow: colors.cardShadow,
                   '&:hover': {
-                    background: colors.gradientButtonHover,
-                    color: colors.beerDeep,
+                    background: `linear-gradient(90deg, ${colors.earthTan} 0%, ${colors.earthBrown} 100%)`,
+                    color: colors.white,
                     transform: 'translateY(-2px)',
                   },
                   transition: 'all 0.2s',
@@ -397,10 +396,10 @@ const BeerDetails = () => {
           severity={snackbar.severity}
           sx={{ 
             width: '100%',
-            background: colors.beerFoam,
-            color: colors.beerDeep,
+            background: colors.white,
+            color: colors.earthBrown,
             '& .MuiAlert-icon': {
-              color: snackbar.severity === 'success' ? colors.beerGold : colors.beerAmber,
+              color: colors.earthTan,
             },
           }}
         >
