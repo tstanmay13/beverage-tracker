@@ -1,8 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { pool } from '../index';
 import { CreateBeerDTO, UpdateBeerDTO } from '../types/beer';
+import crypto from 'crypto';
 
 const router = Router();
+
+// Helper function to generate a random ID
+const generateId = () => {
+  return crypto.randomBytes(3).toString('hex').toUpperCase();
+};
 
 // Get all beers with search, filtering, and pagination
 router.get('/', async (req: Request, res: Response) => {
@@ -12,6 +18,9 @@ router.get('/', async (req: Request, res: Response) => {
       minAbv = 0,
       maxAbv = 100,
       style_id,
+      available_id,
+      is_organic,
+      is_retired,
       page = 1,
       limit = 12
     } = req.query;
@@ -19,25 +28,44 @@ router.get('/', async (req: Request, res: Response) => {
     const offset = (Number(page) - 1) * Number(limit);
     
     let query = `
-      SELECT * FROM beers 
-      WHERE name ILIKE $1 
-      AND abv >= $2 
-      AND abv <= $3
+      SELECT b.*, s.name as style_name, g.name as glassware_name, a.name as availability_name
+      FROM beers b
+      LEFT JOIN styles s ON b.style_id = s.id
+      LEFT JOIN glassware g ON b.glassware_id = g.id
+      LEFT JOIN availability a ON b.available_id = a.id
+      WHERE b.name ILIKE $1 
+      AND (b.abv >= $2 OR b.abv IS NULL)
+      AND (b.abv <= $3 OR b.abv IS NULL)
     `;
     const queryParams = [`%${search}%`, minAbv, maxAbv];
 
     if (style_id) {
-      query += ' AND style_id = $4';
+      query += ' AND b.style_id = $' + (queryParams.length + 1);
       queryParams.push(style_id as string);
     }
 
+    if (available_id) {
+      query += ' AND b.available_id = $' + (queryParams.length + 1);
+      queryParams.push(available_id as string);
+    }
+
+    if (is_organic !== undefined) {
+      query += ' AND b.is_organic = $' + (queryParams.length + 1);
+      queryParams.push(is_organic as string);
+    }
+
+    if (is_retired !== undefined) {
+      query += ' AND b.is_retired = $' + (queryParams.length + 1);
+      queryParams.push(is_retired as string);
+    }
+
     // Get total count for pagination
-    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*)');
+    const countQuery = query.replace('SELECT b.*, s.name as style_name, g.name as glassware_name, a.name as availability_name', 'SELECT COUNT(*)');
     const countResult = await pool.query(countQuery, queryParams);
     const total = parseInt(countResult.rows[0].count);
 
     // Add pagination
-    query += ' ORDER BY name ASC LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2);
+    query += ' ORDER BY b.name ASC LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2);
     queryParams.push(limit as string, offset.toString());
 
     const result = await pool.query(query, queryParams);
@@ -61,7 +89,14 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM beers WHERE id = $1', [id]);
+    const result = await pool.query(`
+      SELECT b.*, s.name as style_name, g.name as glassware_name, a.name as availability_name
+      FROM beers b
+      LEFT JOIN styles s ON b.style_id = s.id
+      LEFT JOIN glassware g ON b.glassware_id = g.id
+      LEFT JOIN availability a ON b.available_id = a.id
+      WHERE b.id = $1
+    `, [id]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Beer not found' });
@@ -79,24 +114,36 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const beer: CreateBeerDTO = req.body;
     const {
-      brewery_id,
       name,
-      cat_id,
-      style_id,
+      name_display,
+      description,
       abv,
       ibu,
       srm,
-      upc,
-      filepath,
-      descript,
-      add_user
+      style_id,
+      available_id,
+      glassware_id,
+      is_organic,
+      is_retired,
+      labels,
+      status,
+      status_display
     } = beer;
+    
+    const id = generateId();
     
     const result = await pool.query(
       `INSERT INTO beers (
-        brewery_id, name, cat_id, style_id, abv, ibu, srm, upc, filepath, descript, add_user
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-      [brewery_id, name, cat_id, style_id, abv, ibu, srm, upc, filepath, descript, add_user]
+        id, name, name_display, description, abv, ibu, srm, style_id,
+        available_id, glassware_id, is_organic, is_retired, labels,
+        status, status_display, create_date, update_date
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *`,
+      [
+        id, name, name_display, description, abv, ibu, srm, style_id,
+        available_id, glassware_id, is_organic, is_retired, labels,
+        status, status_display
+      ]
     );
     
     res.status(201).json(result.rows[0]);
@@ -119,7 +166,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const values = Object.values(updates);
     
     const result = await pool.query(
-      `UPDATE beers SET ${setClause}, last_mod = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
+      `UPDATE beers SET ${setClause}, update_date = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
       [id, ...values]
     );
     

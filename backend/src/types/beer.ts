@@ -1,31 +1,38 @@
 export interface Beer {
-  id: number;
-  brewery_id: number;
+  id: string;
   name: string;
-  cat_id: number;
-  style_id: number;
-  abv: number;
-  ibu: number;
-  srm: number;
-  upc: number;
-  filepath: string;
-  descript: string;
-  add_user: number;
-  last_mod: Date;
+  name_display?: string;
+  description?: string;
+  abv?: number;
+  ibu?: number;
+  srm?: number;
+  style_id?: number;
+  available_id?: number;
+  glassware_id?: number;
+  is_organic?: boolean;
+  is_retired?: boolean;
+  labels?: any;
+  status?: string;
+  status_display?: string;
+  create_date?: Date;
+  update_date?: Date;
 }
 
 export interface CreateBeerDTO {
-  brewery_id: number;
   name: string;
-  cat_id: number;
-  style_id: number;
-  abv: number;
-  ibu: number;
-  srm: number;
-  upc: number;
-  filepath: string;
-  descript: string;
-  add_user: number;
+  name_display?: string;
+  description?: string;
+  abv?: number;
+  ibu?: number;
+  srm?: number;
+  style_id?: number;
+  available_id?: number;
+  glassware_id?: number;
+  is_organic?: boolean;
+  is_retired?: boolean;
+  labels?: any;
+  status?: string;
+  status_display?: string;
 }
 
 export interface UpdateBeerDTO extends Partial<CreateBeerDTO> {} 
