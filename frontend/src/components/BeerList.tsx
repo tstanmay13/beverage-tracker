@@ -259,12 +259,15 @@ const BeerList = () => {
                   textDecoration: 'none',
                   borderRadius: 4,
                   overflow: 'hidden',
-                  background: colors.white,
-                  boxShadow: colors.cardShadow,
+                  background: 'rgba(210,180,140,0.35)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1.5px solid rgba(210,180,140,0.18)',
+                  boxShadow: '0 4px 24px 0 rgba(139, 115, 85, 0.15)',
                   transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
                   '&:hover': {
-                    transform: 'translateY(-8px) scale(1.03)',
-                    boxShadow: colors.glassShadow,
+                    transform: 'translateY(-8px) scale(1.04)',
+                    boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
+                    border: '1.5px solid rgba(210,180,140,0.28)',
                   },
                 }}
               >

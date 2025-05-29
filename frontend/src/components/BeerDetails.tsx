@@ -232,8 +232,11 @@ const BeerDetails = () => {
         sx={{ 
           p: { xs: 2, md: 6 },
           borderRadius: 6,
-          background: colors.gradientHero,
-          boxShadow: colors.glassShadow,
+          background: 'rgba(210,180,140,0.35)',
+          backdropFilter: 'blur(10px)',
+          border: '1.5px solid rgba(210,180,140,0.18)',
+          boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.18)',
+          transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 6 }}>

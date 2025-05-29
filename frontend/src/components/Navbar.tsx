@@ -25,11 +25,13 @@ const Navbar = () => {
         position="static"
         elevation={0}
         sx={{
-          background: colors.gradientHero,
+          background: 'rgba(210,180,140,0.35)',
+          backdropFilter: 'blur(12px)',
           borderRadius: 9999,
-          boxShadow: colors.glassShadow,
-          width: { xs: '95%', sm: '80%', md: '70%' },
-          maxWidth: 900,
+          boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.18)',
+          border: '1.5px solid rgba(210,180,140,0.18)',
+          width: { xs: '98%', sm: '90%', md: '80%' },
+          maxWidth: 1100,
           mx: 'auto',
           py: 1,
           px: 2,
@@ -37,7 +39,7 @@ const Navbar = () => {
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
           <Box className="flex items-center gap-3">
-            <LocalBarIcon sx={{ fontSize: 32, color: colors.beerDeep }} />
+            <LocalBarIcon sx={{ fontSize: 32, color: colors.earthBrown }} />
             <Typography
               variant="h5"
               component={RouterLink}
@@ -45,11 +47,11 @@ const Navbar = () => {
               sx={{
                 fontWeight: 800,
                 letterSpacing: 1,
-                color: colors.beerDeep,
+                color: colors.earthBrown,
                 textDecoration: 'none',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: { xs: '1.2rem', sm: '1.5rem' },
-                textShadow: `0 2px 8px ${colors.beerFoam}`,
+                textShadow: `0 2px 8px ${colors.earthTan}`,
               }}
             >
               Beverage Tracker
@@ -68,17 +70,18 @@ const Navbar = () => {
                   py: 1.2,
                   fontWeight: 600,
                   fontSize: '1rem',
-                  color: location.pathname === link.to ? colors.beerFoam : colors.beerDeep,
+                  color: location.pathname === link.to ? colors.earthTan : colors.earthBrown,
                   background: location.pathname === link.to
-                    ? 'rgba(255,251,233,0.25)'
+                    ? 'rgba(210,180,140,0.12)'
                     : 'transparent',
                   boxShadow: location.pathname === link.to
-                    ? colors.cardShadow
+                    ? '0 0 12px 2px rgba(210,180,140,0.18)'
                     : 'none',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.25s cubic-bezier(.4,2,.3,1)',
                   '&:hover': {
-                    background: 'rgba(255,251,233,0.35)',
-                    color: colors.beerDeep,
+                    background: 'rgba(210,180,140,0.18)',
+                    color: colors.earthBrown,
+                    boxShadow: '0 0 16px 4px rgba(210,180,140,0.25)',
                   },
                 }}
               >
