@@ -122,13 +122,6 @@ const BeerList = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: colors.earthBrown, letterSpacing: 1 }}>
-          Beer Catalog
-        </Typography>
-      </Box>
-
       {/* Search and Filters */}
       <Paper 
         elevation={0}
@@ -136,11 +129,12 @@ const BeerList = () => {
           p: { xs: 2, md: 4 }, 
           mb: 4,
           borderRadius: 4,
-          background: colors.white,
-          boxShadow: colors.cardShadow,
+          background: showFilters ? colors.white : 'transparent',
+          boxShadow: showFilters ? colors.cardShadow : 'none',
+          transition: 'all 0.3s ease-in-out',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: showFilters ? 2 : 0 }}>
           <TextField
             fullWidth
             label="Search Beers"
@@ -188,7 +182,7 @@ const BeerList = () => {
             display: 'flex', 
             flexWrap: 'wrap', 
             gap: 3,
-            mt: showFilters ? 2 : 0,
+            mt: 2,
             overflow: 'hidden',
             transition: 'all 0.3s ease-in-out'
           }}>
