@@ -15,9 +15,17 @@ import {
   Pagination,
   Paper,
   InputAdornment,
+  Skeleton,
+  Chip,
+  Fade,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import LocalBarIcon from '@mui/icons-material/LocalBar';
+import InfoIcon from '@mui/icons-material/Info';
 
 interface Beer {
   id: number;
@@ -54,6 +62,7 @@ const BeerList = () => {
   const [abvRange, setAbvRange] = useState<number[]>([0, 15]);
   const [styleId, setStyleId] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const fetchBeers = async () => {
     setLoading(true);
@@ -93,103 +102,203 @@ const BeerList = () => {
     setPagination(prev => ({ ...prev, page: value }));
   };
 
+  const LoadingSkeleton = () => (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      {[...Array(6)].map((_, index) => (
+        <Box key={index} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
+          <Card sx={{ height: '100%' }}>
+            <Skeleton variant="rectangular" height={200} />
+            <CardContent>
+              <Skeleton variant="text" height={40} />
+              <Skeleton variant="text" height={20} width="60%" />
+              <Skeleton variant="text" height={20} width="80%" />
+            </CardContent>
+          </Card>
+        </Box>
+      ))}
+    </Box>
+  );
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Beer Catalog
-      </Typography>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+        <LocalBarIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+          Beer Catalog
+        </Typography>
+      </Box>
 
       {/* Search and Filters */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-          <Box sx={{ flex: '1 1 300px' }}>
-            <TextField
-              fullWidth
-              label="Search Beers"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <Box sx={{ flex: '1 1 300px' }}>
-            <Typography gutterBottom>ABV Range</Typography>
-            <Slider
-              value={abvRange}
-              onChange={(_, newValue) => setAbvRange(newValue as number[])}
-              valueLabelDisplay="auto"
-              min={0}
-              max={15}
-              step={0.1}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2">{abvRange[0]}%</Typography>
-              <Typography variant="body2">{abvRange[1]}%</Typography>
+      <Paper 
+        elevation={2}
+        sx={{ 
+          p: 3, 
+          mb: 4,
+          borderRadius: 2,
+          background: 'linear-gradient(to right, #ffffff, #f8f9fa)'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <TextField
+            fullWidth
+            label="Search Beers"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ 
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              }
+            }}
+          />
+          <Tooltip title="Toggle Filters">
+            <IconButton 
+              onClick={() => setShowFilters(!showFilters)}
+              color={showFilters ? 'primary' : 'default'}
+            >
+              <FilterListIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        <Fade in={showFilters}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 3,
+            mt: showFilters ? 2 : 0,
+            overflow: 'hidden',
+            transition: 'all 0.3s ease-in-out'
+          }}>
+            <Box sx={{ flex: '1 1 300px' }}>
+              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                ABV Range
+                <Tooltip title="Alcohol by Volume">
+                  <InfoIcon fontSize="small" color="action" />
+                </Tooltip>
+              </Typography>
+              <Slider
+                value={abvRange}
+                onChange={(_, newValue) => setAbvRange(newValue as number[])}
+                valueLabelDisplay="auto"
+                min={0}
+                max={15}
+                step={0.1}
+                sx={{
+                  '& .MuiSlider-thumb': {
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.2)',
+                    },
+                  },
+                }}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Chip label={`${abvRange[0]}%`} size="small" />
+                <Chip label={`${abvRange[1]}%`} size="small" />
+              </Box>
+            </Box>
+            <Box sx={{ flex: '1 1 300px' }}>
+              <FormControl fullWidth>
+                <InputLabel>Style</InputLabel>
+                <Select
+                  value={styleId}
+                  label="Style"
+                  onChange={(e) => setStyleId(e.target.value)}
+                  sx={{ borderRadius: 2 }}
+                >
+                  <MenuItem value="">All Styles</MenuItem>
+                  <MenuItem value="1">Lager</MenuItem>
+                  <MenuItem value="2">Ale</MenuItem>
+                  <MenuItem value="3">Stout</MenuItem>
+                  <MenuItem value="4">IPA</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </Box>
-          <Box sx={{ flex: '1 1 300px' }}>
-            <FormControl fullWidth>
-              <InputLabel>Style</InputLabel>
-              <Select
-                value={styleId}
-                label="Style"
-                onChange={(e) => setStyleId(e.target.value)}
-              >
-                <MenuItem value="">All Styles</MenuItem>
-                <MenuItem value="1">Lager</MenuItem>
-                <MenuItem value="2">Ale</MenuItem>
-                <MenuItem value="3">Stout</MenuItem>
-                <MenuItem value="4">IPA</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
+        </Fade>
       </Paper>
 
       {/* Beer Grid */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-        {beers.map((beer) => (
-          <Box key={beer.id} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
-            <Card
-              component={RouterLink}
-              to={`/beer/${beer.id}`}
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                textDecoration: 'none',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                  transition: 'transform 0.2s ease-in-out',
-                },
-              }}
-            >
-              <CardMedia
-                component="img"
-                height="200"
-                image={beer.filepath || 'https://via.placeholder.com/150'}
-                alt={beer.name}
-              />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="h2">
-                  {beer.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ABV: {beer.abv}%
-                </Typography>
-                <Typography variant="body2" color="text.secondary" noWrap>
-                  {beer.descript}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
-      </Box>
+      {loading ? (
+        <LoadingSkeleton />
+      ) : (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          {beers.map((beer) => (
+            <Box key={beer.id} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
+              <Card
+                component={RouterLink}
+                to={`/beer/${beer.id}`}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  textDecoration: 'none',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: (theme) => theme.shadows[8],
+                  },
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  height="200"
+                  image={beer.filepath || 'https://via.placeholder.com/150'}
+                  alt={beer.name}
+                  sx={{
+                    objectFit: 'cover',
+                    transition: 'transform 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                    },
+                  }}
+                />
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold' }}>
+                    {beer.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                    <Chip 
+                      label={`${beer.abv}% ABV`} 
+                      size="small" 
+                      color="primary"
+                      variant="outlined"
+                    />
+                    <Chip 
+                      label={`${beer.ibu} IBU`} 
+                      size="small" 
+                      color="secondary"
+                      variant="outlined"
+                    />
+                  </Box>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {beer.descript}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          ))}
+        </Box>
+      )}
 
       {/* Pagination */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
@@ -199,6 +308,11 @@ const BeerList = () => {
           onChange={handlePageChange}
           color="primary"
           size="large"
+          sx={{
+            '& .MuiPaginationItem-root': {
+              borderRadius: 1,
+            },
+          }}
         />
       </Box>
     </Container>
