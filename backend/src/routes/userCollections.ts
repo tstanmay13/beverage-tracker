@@ -30,19 +30,25 @@ router.get('/:userId', async (req: Request, res: Response) => {
         uc.updated_at,
         b.id as beer_id,
         b.name,
-        b.brewery_id,
-        b.cat_id,
-        b.style_id,
+        b.name_display,
+        b.description,
         b.abv,
         b.ibu,
         b.srm,
-        b.upc,
-        b.filepath,
-        b.descript,
-        b.add_user,
-        b.last_mod
+        b.style_id,
+        b.available_id,
+        b.glassware_id,
+        b.is_organic,
+        b.is_retired,
+        b.labels,
+        b.status,
+        b.status_display,
+        b.create_date as beer_create_date,
+        b.update_date as beer_update_date,
+        s.name as style_name
       FROM user_collections uc 
       JOIN beers b ON uc.beer_id = b.id 
+      LEFT JOIN styles s ON b.style_id = s.id
       WHERE uc.user_id = $1`,
       [userId]
     );

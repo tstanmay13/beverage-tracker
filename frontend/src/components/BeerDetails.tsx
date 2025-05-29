@@ -59,6 +59,7 @@ interface UserCollection {
   beer_id: string;
   rating: number;
   notes: string;
+  id?: number;
 }
 
 const BeerDetails = () => {
@@ -119,21 +120,47 @@ const BeerDetails = () => {
 
   const handleSave = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/user-collections', {
-        method: userCollection ? 'PUT' : 'POST',
+      const isUpdate = !!userCollection;
+      if (isUpdate) {
+        console.log('Updating collection:', userCollection);
+        if (!userCollection?.collection_id) {
+          setSnackbar({
+            open: true,
+            message: 'Error: Collection ID is missing.',
+            severity: 'error',
+          });
+          return;
+        }
+      }
+      const url = isUpdate
+        ? `http://localhost:4000/api/user-collections/${userCollection.collection_id || userCollection.id}`
+        : 'http://localhost:4000/api/user-collections';
+
+      const body = isUpdate
+        ? JSON.stringify({ rating, notes })
+        : JSON.stringify({
+            user_id: 1, // Hardcoded for demo; replace with actual user ID
+            beer_id: id,
+            rating,
+            notes,
+          });
+
+      const response = await fetch(url, {
+        method: isUpdate ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          user_id: 1, // Hardcoded for demo; replace with actual user ID
-          beer_id: id,
-          rating,
-          notes,
-        }),
+        body,
       });
 
       if (!response.ok) {
         throw new Error('Failed to save to collection');
+      }
+
+      // If it was a POST (add), set userCollection so the button changes to 'Update Rating' immediately
+      if (!userCollection) {
+        const saved = await response.json();
+        setUserCollection({ ...saved, collection_id: saved.collection_id || saved.id });
       }
 
       setSnackbar({

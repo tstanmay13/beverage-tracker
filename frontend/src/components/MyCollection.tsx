@@ -8,14 +8,33 @@ import colors from '../colors';
 interface Beer {
   id: string;
   name: string;
-  brewery: string;
-  style: string;
-  abv: number;
-  imageUrl: string;
-  beer_id: number;
+  name_display?: string;
+  description?: string;
+  abv?: number;
+  ibu?: number;
+  srm?: number;
+  style_id?: number;
+  available_id?: number;
+  glassware_id?: number;
+  is_organic?: boolean;
+  is_retired?: boolean;
+  labels?: {
+    icon?: string;
+    medium?: string;
+    large?: string;
+    contentAwareIcon?: string;
+    contentAwareMedium?: string;
+    contentAwareLarge?: string;
+  };
+  status?: string;
+  status_display?: string;
+  create_date?: string;
+  update_date?: string;
+  beer_id: string;
   collection_id: number;
   rating: number;
   notes: string;
+  style_name?: string;
 }
 
 const MyCollection = () => {
@@ -35,13 +54,25 @@ const MyCollection = () => {
           id: `collection-${item.collection_id}-beer-${item.beer_id}`,
           collection_id: item.collection_id,
           beer_id: item.beer_id,
-          name: item.name,
-          brewery: item.brewery_id,
-          style: item.style_id,
+          name: item.name_display || item.name,
+          name_display: item.name_display,
+          description: item.description,
           abv: item.abv,
+          ibu: item.ibu,
+          srm: item.srm,
+          style_id: item.style_id,
+          available_id: item.available_id,
+          glassware_id: item.glassware_id,
+          is_organic: item.is_organic,
+          is_retired: item.is_retired,
+          labels: item.labels,
+          status: item.status,
+          status_display: item.status_display,
+          create_date: item.beer_create_date,
+          update_date: item.beer_update_date,
           rating: parseFloat(item.rating),
           notes: item.notes,
-          imageUrl: item.filepath || '/default-beer.jpg'
+          style_name: item.style_name,
         }));
         setBeers(beersData);
         setError(null);
@@ -149,8 +180,8 @@ const MyCollection = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={beer.imageUrl || '/default-beer.jpg'}
-                alt={beer.name}
+                image={beer.labels?.medium || beer.labels?.large || '/default-beer.jpg'}
+                alt={beer.name_display || beer.name}
                 sx={{
                   objectFit: 'cover',
                   borderTopLeftRadius: 4,
@@ -161,7 +192,7 @@ const MyCollection = () => {
                 <Typography gutterBottom variant="h6" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
                   {beer.name}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
                   <Chip
                     label={`${beer.abv}% ABV`}
                     size="small"
@@ -172,6 +203,13 @@ const MyCollection = () => {
                     size="small"
                     sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
                   />
+                  {beer.style_name && (
+                    <Chip
+                      label={beer.style_name}
+                      size="small"
+                      sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                    />
+                  )}
                 </Box>
                 {beer.notes && (
                   <Typography
