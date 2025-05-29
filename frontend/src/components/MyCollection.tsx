@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress, Chip, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
+import SportsBarIcon from '@mui/icons-material/SportsBar';
 import colors from '../colors';
 
 interface Beer {
@@ -88,7 +88,7 @@ const MyCollection = () => {
     return (
       <Container sx={{ mt: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-          <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+          <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
           <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
             My Beer Collection
           </Typography>
@@ -112,7 +112,7 @@ const MyCollection = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <LocalBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+        <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
         <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
           My Beer Collection
         </Typography>

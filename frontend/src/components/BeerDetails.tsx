@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
+import SportsBarIcon from '@mui/icons-material/SportsBar';
 import InfoIcon from '@mui/icons-material/Info';
 import SaveIcon from '@mui/icons-material/Save';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -261,7 +261,7 @@ const BeerDetails = () => {
           </Box>
           <Box sx={{ flex: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <LocalBarIcon sx={{ fontSize: 32, color: colors.earthTan }} />
+              <SportsBarIcon sx={{ fontSize: 32, color: colors.earthTan }} />
               <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
                 {beer.name}
               </Typography>

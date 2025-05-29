@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, Typography, Button, Container, Box } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import LocalBarIcon from '@mui/icons-material/LocalBar';
+import SportsBarIcon from '@mui/icons-material/SportsBar';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import colors from '../colors';
 
@@ -8,7 +8,7 @@ const navLinks = [
   {
     label: 'Beer Tracker',
     to: '/',
-    icon: <LocalBarIcon />,
+    icon: <SportsBarIcon />,
   },
   {
     label: 'My Collection',
@@ -38,8 +38,14 @@ const Navbar = () => {
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64 }}>
-          <Box className="flex items-center gap-3">
-            <LocalBarIcon sx={{ fontSize: 32, color: colors.earthBrown }} />
+          <Box className="flex items-center gap-3" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+            <SportsBarIcon sx={{ 
+              fontSize: 32, 
+              color: colors.earthBrown, 
+              display: 'flex', 
+              alignItems: 'center',
+              mt: -0.5
+            }} />
             <Typography
               variant="h5"
               component={RouterLink}
@@ -52,6 +58,8 @@ const Navbar = () => {
                 fontFamily: 'Inter, sans-serif',
                 fontSize: { xs: '1.2rem', sm: '1.5rem' },
                 textShadow: `0 2px 8px ${colors.earthTan}`,
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
               Beverage Tracker
