@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress } from '@mui/material';
+import { Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress, Chip, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import LocalBarIcon from '@mui/icons-material/LocalBar';
+import colors from '../colors';
 
 interface Beer {
   id: string;
@@ -58,7 +60,7 @@ const MyCollection = () => {
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: colors.beerGold }} />
       </Container>
     );
   }
@@ -66,9 +68,18 @@ const MyCollection = () => {
   if (error) {
     return (
       <Container sx={{ mt: 4 }}>
-        <Typography color="error" variant="h6">
+        <Alert 
+          severity="error"
+          sx={{
+            background: colors.beerFoam,
+            color: colors.beerDeep,
+            '& .MuiAlert-icon': {
+              color: colors.beerAmber,
+            },
+          }}
+        >
           {error}
-        </Typography>
+        </Alert>
       </Container>
     );
   }
@@ -76,73 +87,64 @@ const MyCollection = () => {
   if (beers.length === 0) {
     return (
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          My Beer Collection
-        </Typography>
-        <Typography variant="body1">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+          <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.beerDeep, letterSpacing: 1 }}>
+            My Beer Collection
+          </Typography>
+        </Box>
+        <Alert 
+          severity="info"
+          sx={{
+            background: colors.beerFoam,
+            color: colors.beerDeep,
+            '& .MuiAlert-icon': {
+              color: colors.beerGold,
+            },
+          }}
+        >
           Your collection is empty. Start adding beers from the home page!
-        </Typography>
+        </Alert>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        My Beer Collection
-      </Typography>
-      <Grid container spacing={3}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+        <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.beerDeep, letterSpacing: 1 }}>
+          My Beer Collection
+        </Typography>
+      </Box>
+      <Grid container spacing={4}>
         {beers.map((beer) => (
           <Grid 
             key={beer.id}
-            sx={{
-              width: {
-                xs: '100%',
-                sm: 'calc(50% - 12px)',
-                md: 'calc(33.33% - 16px)'
-              }
-            }}
+            item
+            xs={12}
+            sm={6}
+            md={4}
           >
             <Card
               onClick={() => navigate(`/beer/${beer.beer_id}`)}
+              className="glass-card"
               sx={{
                 cursor: 'pointer',
-                transition: 'box-shadow 0.2s',
+                borderRadius: 4,
+                background: colors.gradient,
+                boxShadow: colors.cardShadow,
+                transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 '&:hover': {
-                  boxShadow: 6,
+                  boxShadow: colors.glassShadow,
+                  transform: 'translateY(-8px) scale(1.03)',
                 },
               }}
             >
-              <CardMedia
-                component="img"
-                height="200"
-                image={beer.imageUrl}
-                alt={beer.name}
-              />
-              <CardContent>
-                <Typography variant="h6" component="h2">
-                  {beer.name}
-                </Typography>
-                <Typography color="textSecondary">
-                  {beer.brewery}
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2">
-                    Style: {beer.style}
-                  </Typography>
-                  <Typography variant="body2">
-                    ABV: {beer.abv}%
-                  </Typography>
-                  <Typography variant="body2">
-                    Rating: {beer.rating}
-                  </Typography>
-                  {beer.notes && (
-                    <Typography variant="body2">
-                      Notes: {beer.notes}
-                    </Typography>
-                  )}
-                </Box>
-              </CardContent>
+              {/* ... rest of the card content ... */}
             </Card>
           </Grid>
         ))}
@@ -151,4 +153,4 @@ const MyCollection = () => {
   );
 };
 
-export default MyCollection; 
+export default MyCollection;

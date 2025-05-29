@@ -26,6 +26,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import InfoIcon from '@mui/icons-material/Info';
+import colors from '../colors';
 
 interface Beer {
   id: number;
@@ -122,20 +123,22 @@ const BeerList = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <LocalBarIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+        <LocalBarIcon sx={{ fontSize: 40, color: colors.beerGold }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: colors.beerDeep, letterSpacing: 1 }}>
           Beer Catalog
         </Typography>
       </Box>
 
       {/* Search and Filters */}
       <Paper 
-        elevation={2}
+        elevation={0}
+        className="glass-card"
         sx={{ 
-          p: 3, 
+          p: { xs: 2, md: 4 }, 
           mb: 4,
-          borderRadius: 2,
-          background: 'linear-gradient(to right, #ffffff, #f8f9fa)'
+          borderRadius: 4,
+          background: colors.gradient,
+          boxShadow: colors.cardShadow,
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -147,20 +150,34 @@ const BeerList = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="primary" />
+                  <SearchIcon sx={{ color: colors.beerGold }} />
                 </InputAdornment>
               ),
             }}
             sx={{ 
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-              }
+                borderRadius: 3,
+                background: 'rgba(255,251,233,0.7)',
+                boxShadow: colors.cardShadow,
+              },
+              '& .MuiInputLabel-root': {
+                color: colors.beerDeep,
+              },
             }}
           />
           <Tooltip title="Toggle Filters">
             <IconButton 
               onClick={() => setShowFilters(!showFilters)}
-              color={showFilters ? 'primary' : 'default'}
+              sx={{
+                color: showFilters ? colors.beerGold : colors.beerDeep,
+                background: showFilters ? 'rgba(251,191,36,0.12)' : 'transparent',
+                borderRadius: 2,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  background: 'rgba(251,191,36,0.18)',
+                  color: colors.beerDeep,
+                },
+              }}
             >
               <FilterListIcon />
             </IconButton>
@@ -177,10 +194,10 @@ const BeerList = () => {
             transition: 'all 0.3s ease-in-out'
           }}>
             <Box sx={{ flex: '1 1 300px' }}>
-              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: colors.beerDeep, fontWeight: 600 }}>
                 ABV Range
                 <Tooltip title="Alcohol by Volume">
-                  <InfoIcon fontSize="small" color="action" />
+                  <InfoIcon fontSize="small" sx={{ color: colors.beerGold }} />
                 </Tooltip>
               </Typography>
               <Slider
@@ -191,6 +208,7 @@ const BeerList = () => {
                 max={15}
                 step={0.1}
                 sx={{
+                  color: colors.beerGold,
                   '& .MuiSlider-thumb': {
                     transition: 'transform 0.2s',
                     '&:hover': {
@@ -200,18 +218,18 @@ const BeerList = () => {
                 }}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Chip label={`${abvRange[0]}%`} size="small" />
-                <Chip label={`${abvRange[1]}%`} size="small" />
+                <Chip label={`${abvRange[0]}%`} size="small" sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 600 }} />
+                <Chip label={`${abvRange[1]}%`} size="small" sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 600 }} />
               </Box>
             </Box>
             <Box sx={{ flex: '1 1 300px' }}>
               <FormControl fullWidth>
-                <InputLabel>Style</InputLabel>
+                <InputLabel sx={{ color: colors.beerDeep }}>Style</InputLabel>
                 <Select
                   value={styleId}
                   label="Style"
                   onChange={(e) => setStyleId(e.target.value)}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: 3, background: 'rgba(255,251,233,0.7)' }}
                 >
                   <MenuItem value="">All Styles</MenuItem>
                   <MenuItem value="1">Lager</MenuItem>
@@ -229,7 +247,7 @@ const BeerList = () => {
       {loading ? (
         <LoadingSkeleton />
       ) : (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {beers.map((beer) => (
             <Box key={beer.id} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
               <Card
@@ -240,12 +258,14 @@ const BeerList = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   textDecoration: 'none',
-                  borderRadius: 2,
+                  borderRadius: 4,
                   overflow: 'hidden',
-                  transition: 'all 0.3s ease-in-out',
+                  background: colors.gradient,
+                  boxShadow: colors.cardShadow,
+                  transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
                   '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: (theme) => theme.shadows[8],
+                    transform: 'translateY(-8px) scale(1.03)',
+                    boxShadow: colors.glassShadow,
                   },
                 }}
               >
@@ -256,34 +276,33 @@ const BeerList = () => {
                   alt={beer.name}
                   sx={{
                     objectFit: 'cover',
-                    transition: 'transform 0.3s ease-in-out',
+                    transition: 'transform 0.3s cubic-bezier(.4,2,.3,1)',
                     '&:hover': {
                       transform: 'scale(1.05)',
                     },
                   }}
                 />
                 <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold' }}>
+                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold', color: colors.beerDeep }}>
                     {beer.name}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                     <Chip 
                       label={`${beer.abv}% ABV`} 
                       size="small" 
-                      color="primary"
-                      variant="outlined"
+                      sx={{ background: colors.beerGold, color: colors.beerFoam, fontWeight: 700 }}
                     />
                     <Chip 
                       label={`${beer.ibu} IBU`} 
                       size="small" 
-                      color="secondary"
-                      variant="outlined"
+                      sx={{ background: colors.beerFoam, color: colors.beerDeep, fontWeight: 700 }}
                     />
                   </Box>
                   <Typography 
                     variant="body2" 
-                    color="text.secondary" 
                     sx={{
+                      color: colors.beerDeep,
+                      opacity: 0.8,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
@@ -310,7 +329,20 @@ const BeerList = () => {
           size="large"
           sx={{
             '& .MuiPaginationItem-root': {
-              borderRadius: 1,
+              borderRadius: 2,
+              background: 'rgba(255,251,233,0.7)',
+              color: colors.beerDeep,
+              fontWeight: 600,
+              mx: 0.5,
+              transition: 'all 0.2s',
+              '&.Mui-selected': {
+                background: colors.beerGold,
+                color: colors.beerFoam,
+              },
+              '&:hover': {
+                background: colors.beerGold,
+                color: colors.beerFoam,
+              },
             },
           }}
         />
