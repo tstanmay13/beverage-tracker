@@ -1,6 +1,7 @@
 import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
+import CollectionsIcon from '@mui/icons-material/Collections';
 
 const Navbar = () => {
   return (
@@ -23,9 +24,10 @@ const Navbar = () => {
           <Button
             color="inherit"
             component={RouterLink}
-            to="/add"
+            to="/collection"
+            startIcon={<CollectionsIcon />}
           >
-            Add Beer
+            My Collection
           </Button>
         </Toolbar>
       </Container>

@@ -48,6 +48,7 @@ interface UserCollection {
   notes: string;
   created_at: string;
   updated_at: string;
+  collection_id: number;
 }
 
 const BeerDetails = () => {
@@ -81,13 +82,14 @@ const BeerDetails = () => {
 
         // Then try to fetch the user collection
         try {
-          const collectionResponse = await fetch(`http://localhost:4000/api/user-collections?userId=1&beerId=${id}`);
+          const collectionResponse = await fetch(`http://localhost:4000/api/user-collections/1`);
           if (collectionResponse.ok) {
             const collectionData = await collectionResponse.json();
-            if (collectionData.length > 0) {
-              setUserCollection(collectionData[0]);
-              setRating(collectionData[0].rating);
-              setNotes(collectionData[0].notes);
+            const userBeer = collectionData.find((item: UserCollection) => item.beer_id === parseInt(id!));
+            if (userBeer) {
+              setUserCollection(userBeer);
+              setRating(userBeer.rating);
+              setNotes(userBeer.notes);
             }
           }
         } catch (collectionError) {
@@ -110,7 +112,7 @@ const BeerDetails = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/api/user-collections', {
+      const response = await fetch('http://localhost:4000/api/user-collections' + (userCollection ? `/${userCollection.collection_id}` : ''), {
         method: userCollection ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,13 +125,32 @@ const BeerDetails = () => {
         }),
       });
       if (!response.ok) {
+        if (response.status === 409) {
+          setSnackbar({
+            open: true,
+            message: 'Beer is already in your collection!',
+            severity: 'error'
+          });
+          return;
+        }
         throw new Error('Failed to update user collection');
       }
       setSnackbar({
         open: true,
-        message: 'Collection updated successfully!',
+        message: userCollection ? 'Collection updated successfully!' : 'Beer added to your collection!',
         severity: 'success'
       });
+      // If it was an add, refetch collection info
+      if (!userCollection) {
+        const collectionResponse = await fetch(`http://localhost:4000/api/user-collections/1`);
+        if (collectionResponse.ok) {
+          const collectionData = await collectionResponse.json();
+          const userBeer = collectionData.find((item: UserCollection) => item.beer_id === parseInt(id!));
+          if (userBeer) {
+            setUserCollection(userBeer);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error updating user collection:', error);
       setSnackbar({
@@ -323,7 +344,7 @@ const BeerDetails = () => {
                   fontSize: '1.1rem'
                 }}
               >
-                {userCollection ? 'Update Collection' : 'Add to Collection'}
+                {userCollection ? 'Update Rating' : 'Add to Collection'}
               </Button>
             </Box>
           </Box>

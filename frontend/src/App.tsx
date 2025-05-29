@@ -3,8 +3,8 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import Navbar from './components/Navbar';
 import BeerList from './components/BeerList';
-import AddBeer from './components/AddBeer';
 import BeerDetails from './components/BeerDetails';
+import MyCollection from './components/MyCollection';
 
 const theme = createTheme({
   palette: {
@@ -26,7 +26,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<BeerList />} />
-          <Route path="/add" element={<AddBeer />} />
+          <Route path="/collection" element={<MyCollection />} />
           <Route path="/beer/:id" element={<BeerDetails />} />
         </Routes>
       </Router>

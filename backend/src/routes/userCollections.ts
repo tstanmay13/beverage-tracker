@@ -4,12 +4,46 @@ import { CreateUserCollectionDTO, UpdateUserCollectionDTO } from '../types/userC
 
 const router = Router();
 
+// Clear all user collections (for testing purposes)
+router.delete('/clear', async (req: Request, res: Response) => {
+  try {
+    await pool.query('DELETE FROM user_collections');
+    res.json({ message: 'All user collections cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing user collections:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Get all beers in a user's collection
 router.get('/:userId', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const result = await pool.query(
-      'SELECT uc.*, b.* FROM user_collections uc JOIN beers b ON uc.beer_id = b.id WHERE uc.user_id = $1',
+      `SELECT 
+        uc.id as collection_id,
+        uc.user_id,
+        uc.beer_id,
+        uc.rating,
+        uc.notes,
+        uc.created_at,
+        uc.updated_at,
+        b.id as beer_id,
+        b.name,
+        b.brewery_id,
+        b.cat_id,
+        b.style_id,
+        b.abv,
+        b.ibu,
+        b.srm,
+        b.upc,
+        b.filepath,
+        b.descript,
+        b.add_user,
+        b.last_mod
+      FROM user_collections uc 
+      JOIN beers b ON uc.beer_id = b.id 
+      WHERE uc.user_id = $1`,
       [userId]
     );
     res.json(result.rows);
@@ -24,6 +58,14 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const collection: CreateUserCollectionDTO = req.body;
     const { user_id, beer_id, rating, notes } = collection;
+    // Check if this beer is already in the user's collection
+    const exists = await pool.query(
+      'SELECT * FROM user_collections WHERE user_id = $1 AND beer_id = $2',
+      [user_id, beer_id]
+    );
+    if (exists.rows.length > 0) {
+      return res.status(409).json({ error: 'Beer already in collection' });
+    }
     const result = await pool.query(
       'INSERT INTO user_collections (user_id, beer_id, rating, notes) VALUES ($1, $2, $3, $4) RETURNING *',
       [user_id, beer_id, rating, notes]
