@@ -3,7 +3,7 @@ import {
   Container, Typography, Grid, Card, CardContent, CardMedia, Box, CircularProgress, 
   Chip, Alert, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button,
   List, ListItem, ListItemText, ListItemAvatar, Avatar, Checkbox, ToggleButton, ToggleButtonGroup,
-  Paper, Divider
+  Paper, Divider, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -45,6 +45,13 @@ interface Beer {
   style_name?: string;
 }
 
+interface Style {
+  id: number;
+  name: string;
+  short_name?: string;
+  description?: string;
+}
+
 const MyCollection = () => {
   const [beers, setBeers] = useState<Beer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +61,8 @@ const MyCollection = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedBeers, setSelectedBeers] = useState<Set<number>>(new Set());
   const [multiDeleteDialogOpen, setMultiDeleteDialogOpen] = useState(false);
+  const [styles, setStyles] = useState<Style[]>([]);
+  const [selectedStyle, setSelectedStyle] = useState<string>('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -99,6 +108,19 @@ const MyCollection = () => {
     };
 
     fetchCollection();
+  }, []);
+
+  useEffect(() => {
+    // Fetch styles from backend
+    const fetchStyles = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/styles');
+        setStyles(response.data);
+      } catch (error) {
+        console.error('Error fetching styles:', error);
+      }
+    };
+    fetchStyles();
   }, []);
 
   const handleDeleteClick = (beer: Beer, event: React.MouseEvent) => {
@@ -167,6 +189,11 @@ const MyCollection = () => {
     }
   };
 
+  // Filter beers by selected style
+  const filteredBeers = selectedStyle
+    ? beers.filter(beer => String(beer.style_id) === selectedStyle)
+    : beers;
+
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -219,7 +246,7 @@ const MyCollection = () => {
     );
   }
 
-  const renderGridView = () => (
+  const renderGridView = (beers: Beer[]) => (
     <Grid container spacing={4}>
       {beers.map((beer) => (
         <Grid 
@@ -321,7 +348,7 @@ const MyCollection = () => {
     </Grid>
   );
 
-  const renderListView = () => (
+  const renderListView = (beers: Beer[]) => (
     <Paper 
       elevation={0}
       sx={{ 
@@ -405,13 +432,30 @@ const MyCollection = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+        <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
+          My Beer Collection
+        </Typography>
+      </Box>
+      {/* Style Filter */}
+      <Box sx={{ mb: 3, maxWidth: 320 }}>
+        <FormControl fullWidth>
+          <InputLabel sx={{ color: colors.earthBrown }}>Style</InputLabel>
+          <Select
+            value={selectedStyle}
+            label="Style"
+            onChange={e => setSelectedStyle(e.target.value)}
+            sx={{ borderRadius: 3, background: '#f8f9fa' }}
+          >
+            <MenuItem value="">All Styles</MenuItem>
+            {styles.map(style => (
+              <MenuItem key={style.id} value={String(style.id)}>{style.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <SportsBarIcon sx={{ fontSize: 40, color: colors.earthBrown }} />
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 900, color: colors.earthBrown, letterSpacing: 1 }}>
-            My Beer Collection
-          </Typography>
-        </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           {selectedBeers.size > 0 && (
             <Button
@@ -446,7 +490,7 @@ const MyCollection = () => {
         </Box>
       </Box>
 
-      {viewMode === 'grid' ? renderGridView() : renderListView()}
+      {viewMode === 'grid' ? renderGridView(filteredBeers) : renderListView(filteredBeers)}
 
       {/* Single Delete Dialog */}
       <Dialog

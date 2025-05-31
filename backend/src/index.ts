@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { Pool } from 'pg';
 import beerRoutes from './routes/beers';
 import userCollectionRoutes from './routes/userCollections';
+import styleRoutes from './routes/styles';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +37,7 @@ pool.connect((err, client, release) => {
 // Routes
 app.use('/api/beers', beerRoutes);
 app.use('/api/user-collections', userCollectionRoutes);
+app.use('/api/styles', styleRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

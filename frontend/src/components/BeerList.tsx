@@ -7,7 +7,6 @@ import {
   Typography,
   Box,
   TextField,
-  Slider,
   FormControl,
   InputLabel,
   Select,
@@ -26,6 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import InfoIcon from '@mui/icons-material/Info';
+import axios from 'axios';
 import colors from '../colors';
 
 interface Beer {
@@ -58,6 +58,13 @@ interface Beer {
   update_date?: string;
 }
 
+interface Style {
+  id: number;
+  name: string;
+  short_name?: string;
+  description?: string;
+}
+
 interface PaginationInfo {
   total: number;
   page: number;
@@ -74,18 +81,29 @@ const BeerList = () => {
     totalPages: 0,
   });
   const [search, setSearch] = useState('');
-  const [abvRange, setAbvRange] = useState<number[]>([0, 15]);
   const [styleId, setStyleId] = useState<string>('');
+  const [styles, setStyles] = useState<Style[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    // Fetch styles from backend
+    const fetchStyles = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/styles');
+        setStyles(response.data);
+      } catch (error) {
+        console.error('Error fetching styles:', error);
+      }
+    };
+    fetchStyles();
+  }, []);
 
   const fetchBeers = async () => {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams({
         search,
-        minAbv: abvRange[0].toString(),
-        maxAbv: abvRange[1].toString(),
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
         ...(styleId && { style_id: styleId }),
@@ -111,7 +129,7 @@ const BeerList = () => {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [search, abvRange, styleId, pagination.page]);
+  }, [search, styleId, pagination.page]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPagination(prev => ({ ...prev, page: value }));
@@ -201,35 +219,6 @@ const BeerList = () => {
             transition: 'all 0.3s ease-in-out'
           }}>
             <Box sx={{ flex: '1 1 300px' }}>
-              <Typography gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: colors.earthBrown, fontWeight: 600 }}>
-                ABV Range
-                <Tooltip title="Alcohol by Volume">
-                  <InfoIcon fontSize="small" sx={{ color: colors.earthTan }} />
-                </Tooltip>
-              </Typography>
-              <Slider
-                value={abvRange}
-                onChange={(_, newValue) => setAbvRange(newValue as number[])}
-                valueLabelDisplay="auto"
-                min={0}
-                max={15}
-                step={0.1}
-                sx={{
-                  color: colors.earthTan,
-                  '& .MuiSlider-thumb': {
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.2)',
-                    },
-                  },
-                }}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Chip label={`${abvRange[0]}%`} size="small" sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 600 }} />
-                <Chip label={`${abvRange[1]}%`} size="small" sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 600 }} />
-              </Box>
-            </Box>
-            <Box sx={{ flex: '1 1 300px' }}>
               <FormControl fullWidth>
                 <InputLabel sx={{ color: colors.earthBrown }}>Style</InputLabel>
                 <Select
@@ -239,10 +228,9 @@ const BeerList = () => {
                   sx={{ borderRadius: 3, background: '#f8f9fa' }}
                 >
                   <MenuItem value="">All Styles</MenuItem>
-                  <MenuItem value="1">Lager</MenuItem>
-                  <MenuItem value="2">Ale</MenuItem>
-                  <MenuItem value="3">Stout</MenuItem>
-                  <MenuItem value="4">IPA</MenuItem>
+                  {styles.map(style => (
+                    <MenuItem key={style.id} value={String(style.id)}>{style.name}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -254,7 +242,7 @@ const BeerList = () => {
       {loading ? (
         <LoadingSkeleton />
       ) : (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {beers.map((beer) => (
             <Box key={beer.id} sx={{ flex: '1 1 300px', maxWidth: 'calc(33.333% - 16px)' }}>
               <Card
@@ -262,19 +250,19 @@ const BeerList = () => {
                 to={`/beer/${beer.id}`}
                 sx={{
                   height: '100%',
+                  textDecoration: 'none',
+                  color: 'inherit',
                   display: 'flex',
                   flexDirection: 'column',
-                  textDecoration: 'none',
                   borderRadius: 4,
-                  overflow: 'hidden',
                   background: 'rgba(210,180,140,0.35)',
                   backdropFilter: 'blur(10px)',
                   border: '1.5px solid rgba(210,180,140,0.18)',
                   boxShadow: '0 4px 24px 0 rgba(139, 115, 85, 0.15)',
                   transition: 'all 0.3s cubic-bezier(.4,2,.3,1)',
                   '&:hover': {
-                    transform: 'translateY(-8px) scale(1.04)',
                     boxShadow: '0 8px 32px 0 rgba(139, 115, 85, 0.22)',
+                    transform: 'translateY(-8px) scale(1.04)',
                     border: '1.5px solid rgba(210,180,140,0.28)',
                   },
                 }}
@@ -282,45 +270,59 @@ const BeerList = () => {
                 <CardMedia
                   component="img"
                   height="200"
-                  image={beer.labels?.medium || beer.labels?.large || 'https://via.placeholder.com/150'}
+                  image={beer.labels?.medium || beer.labels?.large || '/default-beer.jpg'}
                   alt={beer.name_display || beer.name}
                   sx={{
                     objectFit: 'cover',
-                    transition: 'transform 0.3s cubic-bezier(.4,2,.3,1)',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                    },
+                    borderTopLeftRadius: 4,
+                    borderTopRightRadius: 4,
                   }}
                 />
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography gutterBottom variant="h5" component="h2" sx={{ fontWeight: 'bold', color: colors.earthBrown }}>
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                  <Typography 
+                    variant="h6" 
+                    component="h2" 
+                    gutterBottom 
+                    sx={{ 
+                      fontWeight: 'bold', 
+                      color: colors.earthBrown,
+                      lineHeight: 1.3,
+                      mb: 2,
+                    }}
+                  >
                     {beer.name_display || beer.name}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                  
+                  <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                     {beer.abv && (
-                      <Chip 
-                        label={`${beer.abv}% ABV`} 
-                        size="small" 
-                        sx={{ background: colors.earthTan, color: colors.earthBrown, fontWeight: 700 }}
-                      />
-                    )}
-                    {beer.ibu && (
-                      <Chip 
-                        label={`${beer.ibu} IBU`} 
-                        size="small" 
-                        sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                      <Chip
+                        label={`${beer.abv}% ABV`}
+                        size="small"
+                        sx={{ 
+                          background: colors.earthTan, 
+                          color: colors.earthBrown, 
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                        }}
                       />
                     )}
                     {beer.style_name && (
-                      <Chip 
+                      <Chip
                         label={beer.style_name}
                         size="small"
-                        sx={{ background: colors.white, color: colors.earthBrown, fontWeight: 700, border: `1px solid ${colors.earthTan}` }}
+                        sx={{ 
+                          background: colors.white, 
+                          color: colors.earthBrown, 
+                          fontWeight: 700, 
+                          border: `1px solid ${colors.earthTan}`,
+                          fontSize: '0.75rem',
+                        }}
                       />
                     )}
                   </Box>
-                  <Typography 
-                    variant="body2" 
+
+                  <Typography
+                    variant="body2"
                     sx={{
                       color: colors.earthBrown,
                       opacity: 0.8,
@@ -329,6 +331,8 @@ const BeerList = () => {
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
+                      lineHeight: 1.5,
+                      mt: 'auto',
                     }}
                   >
                     {beer.description}
